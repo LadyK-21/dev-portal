@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 /*
 ***
 * Takes a strict mobile-first approach and hides this container by default. The
@@ -6,17 +11,55 @@
 ***
 */
 .root {
-  background-color: white;
-  box-shadow: 0 2px 3px rgba(101, 106, 118, 0.1),
-    0 12px 28px rgba(101, 106, 118, 0.25);
-  display: none;
-  flex-direction: column;
-  flex-shrink: 0;
-  height: calc(100vh - var(--sticky-bars-height));
-  left: -150vw;
-  overflow-y: auto;
-  position: fixed;
-  top: var(--sticky-bars-height);
-  width: 100%;
-  z-index: 1;
+	background-color: var(--token-color-surface-primary);
+	box-shadow: var(--token-surface-base-box-shadow);
+	display: none;
+	flex-direction: column;
+	flex-shrink: 0;
+	height: calc(100vh - var(--sticky-bars-height));
+	left: -150vw;
+	overflow-y: auto;
+	position: fixed;
+	width: 100%;
+	z-index: 2;
+	@media (--dev-dot-show-mobile-menu) {
+		top: auto;
+		height: calc(100% - var(--sticky-bars-height));
+	}
+	@media (--dev-dot-hide-mobile-menu) {
+		top: var(--sticky-bars-height);
+	}
+}
+
+.mobileAuthenticationControlsWrap {
+	margin-bottom: 24px;
+}
+
+.unauthenticatedControls {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.unauthenticatedControlButtons {
+	align-items: center;
+	display: flex;
+	gap: 12px;
+	justify-content: space-between;
+
+	& > * {
+		width: 100%;
+	}
+}
+
+.themeSwitcher {
+	composes: hds-font-weight-medium from global;
+	display: flex;
+	justify-content: space-between;
+	color: var(--token-color-foreground-primary);
+	gap: 12px;
+	align-items: center;
+	padding: 12px;
+	border: 1px solid var(--token-color-border-primary);
+	border-radius: 6px;
 }

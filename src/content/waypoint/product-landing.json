@@ -1,0 +1,98 @@
+{
+	"hero": {
+		"heading": "Internal developer platform made easy",
+		"image": "https://www.datocms-assets.com/2885/1662767806-dev-dot-waypoint-landing-hero-2x.png"
+	},
+	"overview": {
+		"heading": "What is HCP Waypoint?",
+		"body": "HCP Waypoint lets platform teams define golden patterns and workflows for developers to manage applications at scale.",
+		"cta": {
+			"text": "Learn more about HCP Waypoint",
+			"url": "/hcp/docs/waypoint"
+		},
+		"image": {
+			"light": "https://www.datocms-assets.com/2885/1679095382-devdot-waypoint_lm.png",
+			"dark": "https://www.datocms-assets.com/2885/1679087832-devdot-waypoint_dm.png"
+		}
+	},
+	"get_started": {
+		"heading": "Getting Started",
+		"body": "Learn how to get started with HCP Waypoint.",
+		"ctas": [
+			{
+				"text": "HCP Waypoint Quick Start",
+				"url": "/waypoint/tutorials/hcp-waypoint/get-started-hcp"
+			}
+		]
+	},
+	"blocks": [
+		{
+			"type": "heading",
+			"heading": "HCP Waypoint Concepts",
+			"level": 2,
+			"size": 400
+		},
+		{
+			"type": "linked_cards",
+			"cards": [
+				{
+					"heading": "Templates",
+					"body": "Learn about templates and how to use them to create projects from a reusable configuration.",
+					"url": "/hcp/docs/waypoint/concepts/application-templates"
+				},
+				{
+					"heading": "Add-ons",
+					"body": "Learn about add-ons and how to use them to add additional functionality to your applications.",
+					"url": "/hcp/docs/waypoint/concepts/add-ons"
+				},
+				{
+					"heading": "Role-based access control",
+					"body": "Learn how to control access to HCP Waypoint functionality with user roles.",
+					"url": "/hcp/docs/waypoint/concepts/rbac"
+				}
+			]
+		},
+		{
+			"type": "heading",
+			"heading": "Platform Team",
+			"level": 2,
+			"size": 400
+		},
+		{
+			"type": "linked_cards",
+			"cards": [
+				{
+					"heading": "Managing templates",
+					"body": "Learn how to create and manage templates in HCP Waypoint.",
+					"url": "/hcp/docs/waypoint/template-create"
+				},
+				{
+					"heading": "Managing add-ons",
+					"body": "Learn how to create and manage add-ons in HCP Waypoint.",
+					"url": "/hcp/docs/waypoint/addon-definition-create"
+				}
+			]
+		},
+		{
+			"type": "heading",
+			"heading": "Application Developers",
+			"level": 2,
+			"size": 400
+		},
+		{
+			"type": "linked_cards",
+			"cards": [
+				{
+					"heading": "Using templates",
+					"body": "Learn how to create projects from templates.",
+					"url": "/hcp/docs/waypoint/template-use"
+				},
+				{
+					"heading": "Using add-ons",
+					"body": "Learn how to install add-ons to HCP Waypoint projects.",
+					"url": "/hcp/docs/waypoint/addon-use"
+				}
+			]
+		}
+	]
+}

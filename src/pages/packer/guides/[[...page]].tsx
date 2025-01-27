@@ -1,19 +1,15 @@
-import packerData from 'data/packer.json'
-import { ProductData } from 'types/products'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import DocsView from 'views/docs-view'
-import { getStaticGenerationFunctions } from 'layouts/sidebar-sidecar/server'
+import { getRootDocsPathGenerationFunctions } from 'views/docs-view/utils/get-root-docs-path-generation-functions'
 
-const basePath = 'guides'
-const baseName = 'Guides'
-const product = packerData as ProductData
-const mainBranch = 'master'
-
-const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions({
-  product,
-  basePath,
-  baseName,
-  mainBranch,
-})
+const { getStaticPaths, getStaticProps } = getRootDocsPathGenerationFunctions(
+	'packer',
+	'guides'
+)
 
 export { getStaticProps, getStaticPaths }
 export default DocsView

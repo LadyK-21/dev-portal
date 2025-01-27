@@ -1,5 +1,10 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 .root {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
+	display: flex;
+	flex-direction: column;
+	gap: 48px;
 }

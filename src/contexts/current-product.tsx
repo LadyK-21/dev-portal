@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { createContext, ReactNode, useContext } from 'react'
 import { useRouter } from 'next/router'
 import { ProductData } from 'types/products'
@@ -7,35 +12,36 @@ export type RouteChangeStartHandler = (url: string) => void
 type CurrentProduct = ProductData | undefined
 
 const CurrentProductContext = createContext<CurrentProduct>(undefined)
+CurrentProductContext.displayName = 'CurrentProductContext'
 
 interface CurrentProductProviderProps {
-  children: ReactNode
-  currentProduct: ProductData
+	children: ReactNode
+	currentProduct: ProductData
 }
 
 const CurrentProductProvider = ({
-  children,
-  currentProduct,
+	children,
+	currentProduct,
 }: CurrentProductProviderProps) => {
-  const router = useRouter()
-  const value = router.asPath === '/' ? null : currentProduct
+	const router = useRouter()
+	const value = router.asPath === '/' ? null : currentProduct
 
-  return (
-    <CurrentProductContext.Provider value={value}>
-      {children}
-    </CurrentProductContext.Provider>
-  )
+	return (
+		<CurrentProductContext.Provider value={value}>
+			{children}
+		</CurrentProductContext.Provider>
+	)
 }
 
 const useCurrentProduct = (): ProductData => {
-  const context = useContext(CurrentProductContext)
-  if (context === undefined) {
-    throw new Error(
-      'useCurrentProduct must be used within a CurrentProductProvider'
-    )
-  }
+	const context = useContext(CurrentProductContext)
+	if (context === undefined) {
+		throw new Error(
+			'useCurrentProduct must be used within a CurrentProductProvider'
+		)
+	}
 
-  return context
+	return context
 }
 
 export { CurrentProductProvider, useCurrentProduct }

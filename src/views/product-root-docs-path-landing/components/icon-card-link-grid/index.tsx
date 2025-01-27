@@ -1,37 +1,50 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { SUPPORTED_ICONS } from 'content/supported-icons'
 import { ProductData, RootDocsPath } from 'types/products'
 import { useCurrentProduct } from 'contexts'
 import IconCardLink from 'components/icon-card-link'
-import { SUPPORTED_ICONS } from '../supported-icons'
+import { IconCardGridItem } from 'views/product-root-docs-path-landing/types'
 import s from './icon-card-link-grid.module.css'
 
 interface ProductRootDocsPathLandingPageProduct extends ProductData {
-  currentRootDocsPath: RootDocsPath
+	currentRootDocsPath: RootDocsPath
 }
 
-const ProductRootDocsPathLandingIconCardLinkGrid = () => {
-  const currentProduct =
-    useCurrentProduct() as ProductRootDocsPathLandingPageProduct
+const ProductRootDocsPathLandingIconCardLinkGrid = ({
+	iconCardGridItems,
+}: {
+	iconCardGridItems?: IconCardGridItem[]
+}) => {
+	const currentProduct =
+		useCurrentProduct() as ProductRootDocsPathLandingPageProduct
+	const items = iconCardGridItems || currentProduct.rootDocsPaths
 
-  return (
-    <ul className={s.root}>
-      {currentProduct.rootDocsPaths.map(({ iconName, path, name }) => {
-        if (currentProduct.currentRootDocsPath.path === path) {
-          return null
-        }
+	return (
+		<ul className={s.root}>
+			{items.map(
+				({ iconName, path, name }: IconCardGridItem | RootDocsPath) => {
+					if (currentProduct.currentRootDocsPath.path === path) {
+						return null
+					}
 
-        return (
-          <li key={path}>
-            <IconCardLink
-              icon={SUPPORTED_ICONS[iconName]}
-              productSlug={currentProduct.slug}
-              text={name}
-              url={path}
-            />
-          </li>
-        )
-      })}
-    </ul>
-  )
+					return (
+						<li key={path}>
+							<IconCardLink
+								icon={SUPPORTED_ICONS[iconName]}
+								productSlug={currentProduct.slug}
+								text={name}
+								url={`/${currentProduct.slug}/${path}`}
+							/>
+						</li>
+					)
+				}
+			)}
+		</ul>
+	)
 }
 
 export default ProductRootDocsPathLandingIconCardLinkGrid

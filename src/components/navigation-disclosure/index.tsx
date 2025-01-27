@@ -1,16 +1,21 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import Disclosure from 'components/disclosure'
 import { NavigationDisclosureProps } from './types'
 import {
-  NavigationDisclosureActivator,
-  NavigationDisclosureActivatorProps,
-  NavigationDisclosureContent,
-  NavigationDisclosureContentProps,
-  NavigationDisclosureLink,
-  NavigationDisclosureLinkProps,
-  NavigationDisclosureList,
-  NavigationDisclosureListItem,
-  NavigationDisclosureListItemProps,
-  NavigationDisclosureListProps,
+	NavigationDisclosureActivator,
+	NavigationDisclosureActivatorProps,
+	NavigationDisclosureContent,
+	NavigationDisclosureContentProps,
+	NavigationDisclosureLink,
+	NavigationDisclosureLinkProps,
+	NavigationDisclosureList,
+	NavigationDisclosureListItem,
+	NavigationDisclosureListItemProps,
+	NavigationDisclosureListProps,
 } from './components'
 
 /**
@@ -24,33 +29,33 @@ import {
  *  - add onMouseLeave listener (for `NavigationHeaderDropdownMenu`)
  */
 const NavigationDisclosure = ({
-  children,
-  className,
+	children,
+	className,
 }: NavigationDisclosureProps) => {
-  return (
-    <Disclosure
-      closeOnClickOutside
-      closeOnFocusOutside
-      containerClassName={className}
-    >
-      {children}
-    </Disclosure>
-  )
+	return (
+		<Disclosure
+			closeOnClickOutside
+			closeOnFocusOutside
+			containerClassName={className}
+		>
+			{children}
+		</Disclosure>
+	)
 }
 
 export type {
-  NavigationDisclosureActivatorProps,
-  NavigationDisclosureContentProps,
-  NavigationDisclosureLinkProps,
-  NavigationDisclosureListItemProps,
-  NavigationDisclosureListProps,
-  NavigationDisclosureProps,
+	NavigationDisclosureActivatorProps,
+	NavigationDisclosureContentProps,
+	NavigationDisclosureLinkProps,
+	NavigationDisclosureListItemProps,
+	NavigationDisclosureListProps,
+	NavigationDisclosureProps,
 }
 export {
-  NavigationDisclosureActivator,
-  NavigationDisclosureContent,
-  NavigationDisclosureLink,
-  NavigationDisclosureList,
-  NavigationDisclosureListItem,
+	NavigationDisclosureActivator,
+	NavigationDisclosureContent,
+	NavigationDisclosureLink,
+	NavigationDisclosureList,
+	NavigationDisclosureListItem,
 }
 export default NavigationDisclosure

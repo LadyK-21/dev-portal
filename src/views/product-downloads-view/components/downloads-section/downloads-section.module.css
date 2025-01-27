@@ -1,71 +1,56 @@
-.root {
-  margin-bottom: 48px;
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+.card {
+	margin-bottom: 32px;
+	padding: 16px;
 }
 
-.cardHeader {
-  align-items: center;
-  display: flex;
-
-  /* Note: logical order is Vault version, then OS.
-     But in flex layout, we want Vault version after OS heading,
-     so that it appears in the top left of the downloads section box */
-  flex-direction: row-reverse;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
-  padding-bottom: 12px;
+.heading,
+.subheading {
+	color: var(--token-color-foreground-strong);
 }
 
-.versionSwitcherWrapper {
-  /* Flex-grow to fill space when in separate row */
-  flex-grow: 1;
-  width: max-content;
-}
-
-.operatingSystemTitle {
-  color: var(--token-color-foreground-strong);
-
-  /* Flex-grow as much as possible to keep .versionSwitcherWrapper small */
-  flex-grow: 100;
+.subheading {
+	margin-bottom: 16px;
 }
 
 .tabContent {
-  margin-top: 16px;
+	margin-top: 16px;
 }
 
-.subHeading {
-  color: var(--token-color-foreground-strong);
-  margin-bottom: 16px;
-  margin-top: 24px;
+.downloadContainer {
+	display: flex;
+	gap: 24px;
+	flex-direction: column;
+	@media (--dev-dot-tablet-up) {
+		flex-wrap: wrap;
+		flex-direction: row;
+	}
 }
 
-.specialSubHeading {
-  margin-bottom: 8px;
+.downloadCard {
+	&:last-child {
+		margin-bottom: 0;
+	}
+	@media (--dev-dot-tablet-up) {
+		flex: 1 1 auto;
+		width: calc(50% - 12px);
+		&:last-child {
+			margin-bottom: auto;
+		}
+	}
 }
 
-.codeTabsCodeBlock {
-  margin-top: 4px;
+.codeBlock {
+	margin-bottom: 32px;
 }
 
-.textAndLinkCard {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-
-  &:not(:last-child) {
-    margin-bottom: 16px;
-  }
+.codeBlocks {
+	margin-bottom: 24px;
 }
 
-.textAndLinkCardTextContainer {
-  margin-right: 16px;
-}
-
-.textAndLinkCardLabel {
-  color: var(--token-color-foreground-strong);
-  margin-bottom: 4px;
-}
-
-.textAndLinkCardVersionLabel {
-  color: var(--token-color-foreground-faint);
+.alert {
+	margin-top: 24px;
 }

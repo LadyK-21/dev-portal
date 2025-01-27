@@ -1,6 +1,16 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { DialogProps as ReachDialogProps } from '@reach/dialog'
+
 export interface DialogProps {
-  isOpen: boolean
-  onDismiss(): void
-  children: React.ReactNode
-  label: string
+	ariaDescribedBy?: string
+	children: React.ReactNode
+	contentClassName?: string
+	isOpen: boolean
+	label: string
+	onDismiss: ReachDialogProps['onDismiss']
+	variant?: 'modal' | 'bottom'
 }

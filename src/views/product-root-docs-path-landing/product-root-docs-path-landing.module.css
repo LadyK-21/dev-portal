@@ -1,5 +1,10 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 .mdxSlotWrapper {
-  margin-top: 48px;
+	margin-top: 48px;
 }
 
 /*
@@ -27,19 +32,19 @@
 */
 
 .waypointMDXWrapper {
-  /* Remove the h1 coming from MDX */
-  & h1:first-of-type {
-    display: none;
-    visibility: hidden;
+	/* Remove the h1 coming from MDX */
+	& h1:first-of-type {
+		display: none;
+		visibility: hidden;
 
-    /* Remove first element after the h1, which duplicates the description */
-    & + * {
-      display: none;
-      visibility: hidden;
-    }
-  }
+		/* Remove first element after the h1, which duplicates the description */
+		& + * {
+			display: none;
+			visibility: hidden;
+		}
+	}
 
-  & h2:first-of-type {
-    margin-top: 0;
-  }
+	& h2:first-of-type {
+		margin-top: 0;
+	}
 }

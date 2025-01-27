@@ -1,43 +1,37 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import classNames from 'classnames'
-import { useCurrentProduct } from 'contexts'
+import { NavigationHeaderItem } from 'components/navigation-header/types'
+import { ProductSlug } from 'types/products'
 import { NavigationHeaderDropdownMenu } from '..'
 import s from './primary-nav-submenu.module.css'
 
-interface NavSubmenuProps {
-  ariaLabel: string
-  navItem: {
-    id?: string
-    isSubmenu?: boolean
-    label: string
-    pathSuffix?: string
-  }
+export interface PrimaryNavSubmenuProps {
+	ariaLabel: string
+	navItem: {
+		iconColorTheme: ProductSlug
+		items: NavigationHeaderItem[]
+		label: string
+	}
 }
 
-const PrimaryNavSubmenu = ({ ariaLabel, navItem }: NavSubmenuProps) => {
-  const { id, label } = navItem
-  const currentProduct = useCurrentProduct()
+const PrimaryNavSubmenu = ({ ariaLabel, navItem }: PrimaryNavSubmenuProps) => {
+	const { iconColorTheme, items, label } = navItem
 
-  return (
-    <NavigationHeaderDropdownMenu
-      ariaLabel={ariaLabel}
-      iconClassName={classNames(
-        s.primarySubnavDropdownItemIcon,
-        currentProduct?.slug
-      )}
-      itemGroups={[
-        {
-          items: currentProduct.navigationHeaderItems[id].map(
-            ({ icon, label, pathSuffix }) => ({
-              icon,
-              label,
-              path: `/${currentProduct.slug}/${pathSuffix}`,
-            })
-          ),
-        },
-      ]}
-      label={label}
-    />
-  )
+	return (
+		<NavigationHeaderDropdownMenu
+			ariaLabel={ariaLabel}
+			iconClassName={classNames(
+				s.primarySubnavDropdownItemIcon,
+				iconColorTheme
+			)}
+			itemGroups={[{ items }]}
+			label={label}
+		/>
+	)
 }
 
 export default PrimaryNavSubmenu

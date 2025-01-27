@@ -1,7 +1,14 @@
 {
-  "extends": "base",
-  "io_sites": {
-    "max_static_paths": 10
-  },
-  "flags": {}
+	"extends": "base",
+	"io_sites": {
+		"max_static_paths": 10
+	},
+	"dev_dot": {
+		"algolia": {
+			"unifiedIndexName": "staging_DEVDOT_omni"
+		}
+	},
+	"flags": {
+		"enable_hvd_on_preview_branch": false
+	}
 }

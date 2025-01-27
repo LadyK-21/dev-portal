@@ -1,19 +1,15 @@
-import vaultData from 'data/vault.json'
-import { ProductData } from 'types/products'
-import { getStaticGenerationFunctions } from 'layouts/sidebar-sidecar/server'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import DocsView from 'views/docs-view'
-import { vaultUrlAdjuster } from 'layouts/sidebar-sidecar/utils/product-url-adjusters'
+import { getRootDocsPathGenerationFunctions } from 'views/docs-view/utils/get-root-docs-path-generation-functions'
 
-const basePath = 'api-docs'
-const baseName = 'API'
-const product = vaultData as ProductData
+const { getStaticPaths, getStaticProps } = getRootDocsPathGenerationFunctions(
+	'vault',
+	'api-docs'
+)
 
-const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions({
-  product,
-  basePath,
-  baseName,
-  additionalRemarkPlugins: [vaultUrlAdjuster],
-})
-
-export { getStaticPaths, getStaticProps }
+export { getStaticProps, getStaticPaths }
 export default DocsView

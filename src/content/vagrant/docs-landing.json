@@ -1,0 +1,109 @@
+{
+	"iconCardGridItems": [
+		{
+			"iconName": "terminal",
+			"name": "CLI",
+			"path": "docs/cli"
+		},
+		{
+			"iconName": "cloud",
+			"name": "Vagrant Cloud",
+			"path": "vagrant-cloud"
+		},
+		{
+			"iconName": "docs",
+			"name": "Vagrantfile",
+			"path": "docs/vagrantfile"
+		}
+	],
+	"pageSubtitle": "Vagrant is the command line utility for managing the lifecycle of virtual machines.",
+	"marketingContentBlocks": [
+		{
+			"type": "card-grid",
+			"title": "Fundamentals",
+			"cards": [
+				{
+					"description": "The package format for Vagrant environments - create your own or use one from the public catalog.",
+					"title": "Boxes",
+					"url": "/vagrant/docs/boxes"
+				},
+				{
+					"description": "Describe your virtual machine's configuration and how to provision it.",
+					"title": "Vagrantfile",
+					"url": "/vagrant/docs/vagrantfile"
+				},
+				{
+					"description": "Provisioners allow you to automatically install software, alter configurations, and more.",
+					"title": "Provisioning",
+					"url": "/vagrant/docs/provisioning"
+				},
+				{
+					"description": "Create and configure your virtual machine with the single most important Vagrant CLI command.",
+					"title": "The 'up' command",
+					"url": "/vagrant/docs/cli/up"
+				},
+				{
+					"description": "Sync files from your host machine to the guest machine.",
+					"title": "Synced Folders",
+					"url": "/vagrant/docs/synced-folders"
+				},
+				{
+					"description": "Access your virtual machines through the high-level networking set up by Vagrant.",
+					"title": "Networking",
+					"url": "/vagrant/docs/networking"
+				}
+			]
+		},
+		{
+			"type": "card-grid",
+			"title": "HCP Vagrant Registry",
+			"description": "HCP Vagrant Registry serves a public, searchable index of Vagrant boxes.",
+			"cards": [
+				{
+					"description": "Store and version your Vagrant boxes in HCP Vagrant Registry.",
+					"title": "Catalog",
+					"url": "/hcp/docs/vagrant"
+				},
+				{
+					"description": "Configure HCP Vagrant Registry permissions.",
+					"title": "Configure permissions",
+					"url": "/hcp/docs/vagrant/permissions"
+				},
+				{
+					"description": "Reclaim registries from Vagrant Cloud.",
+					"title": "Reclaim registries",
+					"url": "/hcp/docs/vagrant/reclaim-vagrant-cloud"
+				}
+			]
+		},
+		{
+			"type": "section-heading",
+			"title": "Developers"
+		},
+		{
+			"type": "icon-card-grid",
+			"cards": [
+				{
+					"iconName": "terminal",
+					"text": "CLI Commands",
+					"url": "/vagrant/docs/cli"
+				},
+				{
+					"iconName": "api",
+					"text": "Vagrant Cloud API",
+					"url": "/vagrant/vagrant-cloud/api"
+				},
+				{
+					"iconName": "plug",
+					"text": "Plugins",
+					"url": "/vagrant/docs/plugins"
+				},
+				{
+					"iconName": "guide",
+					"text": "Providers",
+					"url": "/vagrant/docs/providers"
+				}
+			]
+		}
+	]
+}

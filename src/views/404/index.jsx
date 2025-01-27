@@ -1,34 +1,25 @@
-import Link from 'next/link'
-import { useEffect } from 'react'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { useErrorPageAnalytics } from '@hashicorp/platform-analytics'
+import Link from 'components/link'
 import s from './404.module.css'
 
 export default function NotFound() {
-  useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      typeof window?.analytics?.track === 'function' &&
-      typeof window?.document?.referrer === 'string' &&
-      typeof window?.location?.href === 'string'
-    ) {
-      window.analytics.track(window.location.href, {
-        category: '404 Response',
-        label: window.document.referrer || 'No Referrer',
-      })
-    }
-  }, [])
+	useErrorPageAnalytics(404)
 
-  return (
-    <div className={s.root}>
-      <h1 className="g-type-display-1">Page Not Found</h1>
-      <p>
-        We&apos;re sorry but we can&apos;t find the page you&apos;re looking
-        for.
-      </p>
-      <p>
-        <Link href="/">
-          <a>Back to Home</a>
-        </Link>
-      </p>
-    </div>
-  )
+	return (
+		<div className={s.root}>
+			<h1 className="g-type-display-1">Page Not Found</h1>
+			<p>
+				We&apos;re sorry but we can&apos;t find the page you&apos;re looking
+				for.
+			</p>
+			<p>
+				<Link href="/">Back to Home</Link>
+			</p>
+		</div>
+	)
 }

@@ -1,88 +1,126 @@
-import dynamic from 'next/dynamic'
-import { MDXRemote } from 'next-mdx-remote'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+import { usePathname } from 'next/navigation'
 import { useCurrentProduct } from 'contexts'
-import defaultMdxComponents from 'layouts/sidebar-sidecar/utils/_local_platform-docs-mdx'
-import TabProvider from 'components/tabs/provider'
-import DevDotContent from 'components/dev-dot-content'
-import { DocsViewProps, ProductsToPrimitivesMap } from './types'
-import { NoIndexTagIfVersioned } from './components/no-index-tag-if-versioned'
-import ProductDocsSearch from './components/product-docs-search'
+import classNames from 'classnames'
+import { getVersionFromPath } from 'lib/get-version-from-path'
 import DocsViewLayout from 'layouts/docs-view-layout'
+import DevDotContent from 'components/dev-dot-content'
+import NoIndexTagIfVersioned from 'components/no-index-tag-if-versioned'
+import { DocsViewProps } from './types'
+import DocsPageHeading from './components/docs-page-heading'
+import getDocsMdxComponents from './utils/get-docs-mdx-components'
+import s from './docs-view.module.css'
+import LandingHero from 'components/docs-landing-hero'
+import DocsPlainPageHeading from './components/docs-plain-page-heading'
+import DocsVersionSwitcher from 'components/docs-version-switcher'
 
-// Author primitives
-const Badge = dynamic(() => import('components/author-primitives/packer/badge'))
-const BadgesHeader = dynamic(
-  () => import('components/author-primitives/packer/badges-header')
-)
-const Button = dynamic(() => import('@hashicorp/react-button'))
-const Checklist = dynamic(
-  () => import('components/author-primitives/packer/checklist')
-)
-const Columns = dynamic(
-  () => import('components/author-primitives/vault/columns')
-)
-const ConfigEntryReference = dynamic(
-  () => import('components/author-primitives/consul/config-entry-reference')
-)
-const InlineTag = dynamic(
-  () => import('components/author-primitives/vault/inline-tag')
-)
-const NestedNode = dynamic(
-  () => import('components/author-primitives/waypoint/nested-node')
-)
-const Placement = dynamic(
-  () => import('components/author-primitives/shared/placement-table')
-)
-const PluginBadge = dynamic(
-  () => import('components/author-primitives/packer/plugin-badge')
-)
-const ProviderTable = dynamic(
-  () => import('components/author-primitives/terraform/provider-table')
-)
-const SentinelEmbedded = dynamic(
-  () => import('@hashicorp/react-sentinel-embedded')
-)
-
-const productsToPrimitives: ProductsToPrimitivesMap = {
-  boundary: null,
-  consul: { ConfigEntryReference },
-  hcp: null,
-  nomad: { Placement },
-  packer: { Badge, BadgesHeader, Checklist, PluginBadge },
-  sentinel: { SentinelEmbedded },
-  terraform: { ProviderTable },
-  vagrant: { Button },
-  vault: { Columns, Tag: InlineTag },
-  waypoint: { NestedNode, Placement },
+/**
+ * Layouts
+ *
+ * Note: layout in frontmatter is not fully supported yet.
+ * Asana task: https://app.asana.com/0/1202097197789424/1202850056121889/f
+ *
+ * Note: layout adjustments may make sense to adjust in `getStaticProps` logic,
+ * rather than adjust during render. For example, this could could give us
+ * more granular and efficient control over processing markdown and extracting
+ * or replacing specific elements.
+ * Task: https://app.asana.com/0/1202097197789424/1204069295311480/f
+ *
+ * For now, we're kind of imitating the proposed layouts-in-frontmatter approach
+ * by setting `docs-root-landing` in `get-custom-layout.ts`, detecting that
+ * here, and rendering a slightly different page heading as a result.
+ */
+function isDocsRootLandingLayout(layoutData) {
+	return layoutData?.name === 'docs-root-landing'
 }
 
-const DocsView = ({ mdxSource, lazy, hideSearch = false }: DocsViewProps) => {
-  const currentProduct = useCurrentProduct()
-  const { compiledSource, scope } = mdxSource
-  const additionalComponents = productsToPrimitives[currentProduct.slug] || {}
-  const components = defaultMdxComponents({ additionalComponents })
-  const shouldRenderSearch =
-    !hideSearch && __config.flags.enable_product_docs_search
+const DocsView = ({
+	metadata,
+	mdxSource,
+	versions,
+	projectName,
+	layoutProps,
+	outlineItems,
+	pageHeading,
+}: DocsViewProps) => {
+	const pathname = usePathname()
+	const currentProduct = useCurrentProduct()
+	const { compiledSource, scope } = mdxSource
+	const docsMdxComponents = getDocsMdxComponents(currentProduct.slug)
 
-  return (
-    <>
-      {shouldRenderSearch ? <ProductDocsSearch /> : null}
-      <DevDotContent>
-        <NoIndexTagIfVersioned />
-        <TabProvider>
-          <MDXRemote
-            compiledSource={compiledSource}
-            components={components}
-            lazy={lazy}
-            scope={scope}
-          />
-        </TabProvider>
-      </DevDotContent>
-    </>
-  )
+	/**
+	 * Check if we have a `pageHeading` to render. The `DocsPageHeading` element
+	 * is used on nearly all docs pages, to render a heading element alongside an
+	 * optional version selector. On docs "landing" pages, the heading element
+	 * takes on additional styles (see `LandingHero`).
+	 *
+	 * The one use case where we don't have this is for Packer plugin docs,
+	 * which uses this `DocsView` component directly but uses `docs-view/server`
+	 * indirectly, with some other modifications, such as adding badges above the
+	 * page heading. Packer plugins MDX processing does _not_ remove the `<h1 />`
+	 * from MDX content, so we do not want to render a duplicative
+	 * `DocsPageHeading` `h1` element.
+	 *
+	 * The Packer plugins use case will fade away after Integrations work,
+	 * at which point we can always safely render <DocsPageHeading />.
+	 * Task: https://app.asana.com/0/1202097197789424/1204412156894157/f
+	 */
+	const renderPageHeadingOutsideMdx = pageHeading?.id && pageHeading?.title
+	const hasLandingHero = isDocsRootLandingLayout(metadata.layout)
+	// For `docs-root-landing` layouts, use <LandingHero /> as the heading element
+	let headingSlot
+	if (hasLandingHero) {
+		headingSlot = (
+			<LandingHero
+				pageHeading={pageHeading}
+				pageSubtitle={metadata?.layout?.subtitle}
+			/>
+		)
+	} else if (renderPageHeadingOutsideMdx) {
+		headingSlot = (
+			<DocsPlainPageHeading id={pageHeading.id} title={pageHeading.title} />
+		)
+	}
+
+	return (
+		<DocsViewLayout
+			{...layoutProps}
+			outlineItems={outlineItems}
+			versions={versions}
+		>
+			{renderPageHeadingOutsideMdx ? (
+				<DocsPageHeading
+					className={classNames(s.docsPageHeading, {
+						[s.hasLandingHero]: hasLandingHero,
+					})}
+					versionSelectorSlot={
+						versions && versions.length > 0 ? (
+							<DocsVersionSwitcher
+								options={versions}
+								projectName={projectName}
+							/>
+						) : null
+					}
+					headingSlot={headingSlot}
+				/>
+			) : null}
+			<NoIndexTagIfVersioned isVersioned={!!getVersionFromPath(pathname)} />
+			<DevDotContent
+				mdxRemoteProps={{
+					compiledSource,
+					scope,
+					components: {
+						...docsMdxComponents,
+						wrapper: (props) => <div className={s.mdxContent} {...props} />,
+					},
+				}}
+			/>
+		</DocsViewLayout>
+	)
 }
-
-DocsView.layout = DocsViewLayout
 
 export type { DocsViewProps }
 export default DocsView

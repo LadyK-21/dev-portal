@@ -1,10 +1,15 @@
-.root {
-  composes: hds-typography-body-200 from global;
-  color: var(--token-color-foreground-strong);
-  font-weight: var(--token-typography-font-weight-semibold);
-  margin: 0 0 4px 0;
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
 
-  &:not(:first-child) {
-    margin-top: 8px;
-  }
+.root {
+	composes: hds-typography-body-200 from global;
+	color: var(--token-color-foreground-strong);
+	font-weight: var(--token-typography-font-weight-semibold);
+	margin: 0 0 4px 0;
+
+	&:not(:first-child) {
+		margin-top: 8px;
+	}
 }

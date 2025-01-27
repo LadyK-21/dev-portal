@@ -1,28 +1,32 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { ProductMeta, Products } from '@hashicorp/platform-product-meta'
 import { Product as LearnProduct } from 'lib/learn-client/types'
-import { MenuItem } from 'components/sidebar'
-import { NavigationHeaderItem } from 'components/navigation-header'
 
 type ProductName =
-  | 'Boundary'
-  | 'Consul'
-  | 'HashiCorp Cloud Platform'
-  | 'Nomad'
-  | 'Packer'
-  | 'Sentinel'
-  | 'Terraform'
-  | 'Vagrant'
-  | 'Vault'
-  | 'Waypoint'
+	| 'Boundary'
+	| 'Consul'
+	| 'HashiCorp Cloud Platform'
+	| 'Nomad'
+	| 'Packer'
+	| 'Sentinel'
+	| 'Terraform'
+	| 'Vagrant'
+	| 'Vault'
+	| 'Waypoint'
+	| 'HCP Vault Secrets'
 
 type ProductSlug = Exclude<Products, 'hashicorp'> | 'hcp' | 'sentinel'
 
 interface Product extends ProductMeta {
-  name: ProductName
-  slug: ProductSlug
+	name: ProductName
+	slug: ProductSlug
 }
 
-type LearnProductSlug = Exclude<ProductSlug, 'hcp' | 'sentinel'>
+type LearnProductSlug = Exclude<ProductSlug, 'hcp'>
 
 /**
  * This is needed so that `LearnProductData` can extend both `ProductData` and
@@ -30,9 +34,16 @@ type LearnProductSlug = Exclude<ProductSlug, 'hcp' | 'sentinel'>
  *
  * "Types of property 'name' are incompatible"
  */
-type LearnProductName = Exclude<
-  ProductName,
-  'HashiCorp Cloud Platform' | 'Sentinel'
+type LearnProductName = Exclude<ProductName, 'HashiCorp Cloud Platform'>
+
+type HcpProductName = Exclude<
+	ProductName,
+	'HashiCorp Cloud Platform' | 'Nomad' | 'Sentinel' | 'Terraform' | 'Vagrant'
+>
+
+type HcpProductSlug = Exclude<
+	ProductSlug,
+	'hcp' | 'nomad' | 'sentinel' | 'terraform' | 'vagrant'
 >
 
 /**
@@ -41,50 +52,171 @@ type LearnProductName = Exclude<
  * options for `slug`.
  */
 interface LearnProductData extends ProductData {
-  name: LearnProductName
-  slug: LearnProduct['slug']
+	name: LearnProductName
+	slug: LearnProduct['slug']
 }
 
+/**
+ * Object representing the metadata for a product's "root docs path", or a
+ * section of documentation for a product.
+ *
+ * Examples of root docs paths:
+ *  - /consul/commands
+ *  - /consul/docs
+ *  - /consul/plugins
+ */
 interface RootDocsPath {
-  iconName: string
-  name: string
-  path: string
-  shortName?: string
+	/**
+	 * The name of an icon to associate with a root docs path.
+	 */
+	iconName: string
+
+	/**
+	 * Whether or not the remote MDX content for a path should be included in the
+	 * rendered page content.
+	 */
+	includeMDXSource?: boolean
+
+	/**
+	 * The proper noun name of a root docs path.
+	 */
+	name: string
+
+	/**
+	 * The router path associated with a root docs path, excluding the slug of the
+	 * associated product.
+	 */
+	path: string
+
+	/**
+	 * Optional product slug for our content API. For some products, this differs
+	 * from the product slug used on the client. For example, "hcp" is
+	 * "hcp-docs" in the content API.
+	 */
+	productSlugForLoader?: string
+
+	/**
+	 * Optional basePath for our content API. For "sentinel", this differs
+	 * from the basePath used on the client, as sentinel content is served
+	 * on docs.hashicorp.com/sentinel.
+	 */
+	basePathForLoader?: string
+
+	/**
+	 * An optional, shortened version of the `name` property. For example,
+	 * "Documentation" may be shortened to "Docs" in some places using this
+	 * property.
+	 */
+	shortName?: string
+
+	/**
+	 * An optional property to specify the nav-data file name prefix for our
+	 * docs content loader.
+	 *
+	 * For example, the Terraform  base path `plugin/log`
+	 * contains a slash, so we must provide the `navDataPrefix` as `plugin-log`
+	 * to successfully load nav data from `plugin-log-nav-data.json`.
+	 *
+	 * If omitted, defaults to the basePath (`docs` → `docs-nav-data.json`).
+	 */
+	navDataPrefix?: string
+
+	/**
+	 * An optional property to specify which branch our
+	 * content API should pull from. Defaults to `main`.
+	 */
+	mainBranch?: string
+
+	/**
+	 * An optional description for this category of documentation.
+	 * Shown as the subtitle of the docs landing hero element.
+	 * If omitted, falls back to the page's authored frontMatter.description,
+	 * or falls back to an empty string.
+	 */
+	description?: string
+}
+
+export type DocsNavItem = {
+	icon: string
+	label: string
+	fullPath: string
 }
 
 interface ProductData extends Product {
-  basePaths: string[]
-  navigationHeaderItems: {
-    [key: string]: {
-      icon: NavigationHeaderItem['icon']
-      pathSuffix: string
-      label: NavigationHeaderItem['label']
-    }[]
-  }
-  rootDocsPaths?: RootDocsPath[]
-  sidebar: {
-    landingPageNavData: MenuItem[]
-  }
-  algoliaConfig: {
-    indexName: string
-  }
+	algoliaConfig: {
+		indexName: string
+	}
+	basePaths: string[]
+	rootDocsPaths: RootDocsPath[]
+	/**
+	 * When configuring docsNavItems, authors have the option to specify
+	 * the full data structure, or use a string that matches a rootDocsPath.path
+	 * as a shorthand, in which case a DocsNavItem will be parsed from
+	 * the matching rootDocsPath.
+	 */
+	docsNavItems?: (DocsNavItem | string)[]
+	integrationsConfig?: {
+		/**
+		 * Descriptive text that provides an overview of the product's integrations.
+		 * Example: "A curated collection of official, partner, and
+		 * community <Product> Integrations."
+		 */
+		description?: string
+		sidebarLinks?: {
+			title: string
+			href: string
+		}[]
+	}
 }
 
 interface ProductWithCurrentRootDocsPath extends ProductData {
-  currentRootDocsPath: RootDocsPath
+	currentRootDocsPath: RootDocsPath
 }
 
 type ProductGroup = Product[]
 
+type ProductNavData = {
+	title: string
+	products: {
+		product: string
+		url: string
+		description: string
+	}[]
+}[]
+
+type ProductNavPromo = {
+	title: string
+	description: string
+	linkUrl: string
+	linkTitle: string
+	icon: string
+	theme: string
+}
+
+type ProductSidePanel = {
+	label: string
+	navItems: {
+		title: string
+		description: string
+		url: string
+		icon: string
+	}[]
+}
+
 export type {
-  LearnProductData,
-  LearnProductName,
-  LearnProductSlug,
-  Product,
-  ProductData,
-  ProductGroup,
-  ProductName,
-  ProductSlug,
-  ProductWithCurrentRootDocsPath,
-  RootDocsPath,
+	LearnProductData,
+	LearnProductName,
+	LearnProductSlug,
+	HcpProductName,
+	HcpProductSlug,
+	Product,
+	ProductData,
+	ProductGroup,
+	ProductName,
+	ProductSlug,
+	ProductWithCurrentRootDocsPath,
+	RootDocsPath,
+	ProductNavData,
+	ProductNavPromo,
+	ProductSidePanel,
 }

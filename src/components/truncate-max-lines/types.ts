@@ -1,7 +1,12 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import type { ReactNode } from 'react'
 
 export interface TruncateMaxLinesProps {
-  children: ReactNode
-  maxLines: number
-  lineHeight: string
+	children: ReactNode
+	className?: string
+	maxLines: number
 }

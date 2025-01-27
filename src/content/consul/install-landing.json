@@ -1,0 +1,49 @@
+{
+	"featuredCollectionsSlugs": [
+		"consul/get-started-kubernetes",
+		"consul/get-started-vms"
+	],
+	"featuredTutorialsSlugs": [
+		"consul/kubernetes-api-gateway",
+		"consul/consul-terraform-sync",
+		"consul/serverless-consul-with-lambda"
+	],
+	"sidebarMenuItems": [
+		{
+			"divider": true
+		},
+		{ "heading": "Kubernetes Installs" },
+		{
+			"title": "Consul K8s CLI",
+			"fullPath": "/consul/docs/k8s/installation/install-cli"
+		},
+		{
+			"title": "Helm Chart",
+			"fullPath": "/consul/docs/k8s/installation/install"
+		}
+	],
+	"sidecarMarketingCard": {
+		"title": "About Consul",
+		"subtitle": "Consul offers a fully-featured service mesh solution that solves the networking and security challenges of operating microservices in multi-cloud and hybrid-cloud environment.",
+		"featuredDocsLinks": [
+			{
+				"href": "/consul/docs/intro",
+				"text": "What is Consul?"
+			},
+			{
+				"href": "/consul/api-docs",
+				"text": "API Introduction"
+			},
+			{
+				"href": "/consul/commands",
+				"text": "Commands (CLI)"
+			}
+		]
+	},
+	"sidecarHcpCallout": {
+		"heading": "HCP Consul Dedicated",
+		"description": "Discover and securely connect your applications",
+		"ctaText": "Try HCP Consul Dedicated for free",
+		"ctaUrl": "https://portal.cloud.hashicorp.com/sign-up"
+	}
+}

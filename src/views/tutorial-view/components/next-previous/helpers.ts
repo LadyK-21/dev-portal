@@ -1,87 +1,110 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import {
-  Collection as ClientCollection,
-  CollectionLite as ClientCollectionLite,
-  TutorialLite as ClientTutorialLite,
+	Collection as ClientCollection,
+	CollectionLite as ClientCollectionLite,
+	TutorialLite as ClientTutorialLite,
 } from 'lib/learn-client/types'
-import {
-  getCollectionSlug,
-  getTutorialSlug,
-} from 'views/collection-view/helpers'
 import { NextPreviousProps } from '.'
 
 interface GetNextPreviousParams {
-  currentTutorialSlug: string
-  currentCollection: ClientCollection
-  nextCollectionInSidebar: ClientCollectionLite
+	currentTutorialSlug: string
+	currentCollection: ClientCollection
+	nextCollectionInSidebar: ClientCollectionLite
+	formatting: {
+		getCollectionSlug(collectionSlug): string
+		getTutorialSlug(tutorialSlug: string, collectionSlug: string): string
+	}
 }
 
 export function getNextPrevious({
-  currentTutorialSlug,
-  currentCollection,
-  nextCollectionInSidebar,
+	currentTutorialSlug,
+	currentCollection,
+	nextCollectionInSidebar,
+	formatting,
 }: GetNextPreviousParams): NextPreviousProps {
-  let previousTutorial
-  let nextTutorial
-  let nextCollection
-  const tutorialIndex = currentCollection.tutorials.findIndex(
-    (t: ClientTutorialLite) => t.slug === currentTutorialSlug
-  )
-  const isFirstTutorial = tutorialIndex === 0
-  const isLastTutorial =
-    tutorialIndex === currentCollection.tutorials.length - 1
+	let previousTutorial
+	let nextTutorial
+	let nextCollection
+	const tutorialIndex = currentCollection.tutorials.findIndex(
+		(t: ClientTutorialLite) => t.slug === currentTutorialSlug
+	)
+	const isFirstTutorial = tutorialIndex === 0
+	const isLastTutorial =
+		tutorialIndex === currentCollection.tutorials.length - 1
 
-  if (!isFirstTutorial) {
-    const { slug, name } = currentCollection.tutorials[tutorialIndex - 1]
-    previousTutorial = {
-      path: getTutorialSlug(slug, currentCollection.slug),
-      name,
-    }
-  }
+	if (!isFirstTutorial) {
+		const { slug, shortName } = currentCollection.tutorials[tutorialIndex - 1]
+		previousTutorial = {
+			path: formatting.getTutorialSlug(slug, currentCollection.slug),
+			name: shortName,
+		}
+	}
 
-  if (!isLastTutorial) {
-    const { slug, name } = currentCollection.tutorials[tutorialIndex + 1]
-    nextTutorial = {
-      path: getTutorialSlug(slug, currentCollection.slug),
-      name,
-    }
-  }
+	if (!isLastTutorial) {
+		const { slug, shortName } = currentCollection.tutorials[tutorialIndex + 1]
+		nextTutorial = {
+			path: formatting.getTutorialSlug(slug, currentCollection.slug),
+			name: shortName,
+		}
+	}
 
-  if (nextCollectionInSidebar) {
-    nextCollection = {
-      path: getCollectionSlug(nextCollectionInSidebar.slug),
-      name: nextCollectionInSidebar.shortName,
-    }
-  }
+	if (nextCollectionInSidebar) {
+		nextCollection = {
+			path: formatting.getCollectionSlug(nextCollectionInSidebar.slug),
+			name: nextCollectionInSidebar.shortName,
+		}
+	}
 
-  /**
-   * @TODO - interim state for 'final' link
-   * This link shows on the last tutorial in the last collection in sidebar order
-   * In learn, it links to a filtered advanced search page state
-   * e.g. https://learn.hashicorp.com/search?product=waypoint&page=1
-   *
-   * Since don't have an advanced search page for beta,
-   * were linking folks back to the baseproduct tutorials page.
-   */
-  const finalLink = `/${currentCollection.theme}/tutorials`
+	let finalLink = getTutorialLibraryLink(currentCollection.theme)
+	const currentCollectionSection = currentCollection.slug.split('/')[0]
 
-  const tutorial = {
-    previous: previousTutorial,
-    next: nextTutorial,
-    isLast: isLastTutorial,
-  }
+	if (currentCollectionSection === 'well-architected-framework') {
+		finalLink = '/well-architected-framework'
+	}
 
-  const collection = {
-    current: {
-      path: getCollectionSlug(currentCollection.slug),
-      name: currentCollection.shortName,
-    },
-    next: nextCollection,
-    isLast: isLastTutorial && !nextCollection, // if next collection isn't defined and were on the last tutorial, the api returned null
-  }
+	if (currentCollectionSection === 'validated-patterns') {
+		finalLink = '/validated-patterns'
+	}
 
-  return {
-    tutorial,
-    collection,
-    finalLink,
-  }
+	const tutorial = {
+		previous: previousTutorial,
+		next: nextTutorial,
+		isLast: isLastTutorial,
+	}
+
+	const collection = {
+		current: {
+			path: formatting.getCollectionSlug(currentCollection.slug),
+			name: currentCollection.shortName,
+		},
+		next: nextCollection,
+		isLast: isLastTutorial && !nextCollection, // if next collection isn't defined and were on the last tutorial, the api returned null
+	}
+
+	return {
+		tutorial,
+		collection,
+		finalLink,
+	}
+}
+
+function getTutorialLibraryLink(theme: ClientCollection['theme']) {
+	const path = `/tutorials/library`
+	const searchParams = new URLSearchParams()
+
+	if (theme === 'hashicorp') {
+		return path
+	}
+
+	if (theme === 'cloud') {
+		searchParams.set('edition', 'hcp')
+	} else {
+		searchParams.set('product', theme)
+	}
+
+	return `${path}?${searchParams.toString()}`
 }

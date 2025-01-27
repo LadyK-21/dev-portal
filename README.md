@@ -1,14 +1,77 @@
 # HashiCorp Developer - developer.hashicorp.com
 
-> 🚧 This project is in beta phase.
+Welcome to HashiCorp Developer! This is the home for HashiCorp product reference documentation and tutorials for our practitioners. For background information on this project, refer to [[MKTG-034]](https://docs.google.com/document/d/1ASyBOCWWP8VUahbL5c5y0qrDMgqhYdXJ2h15xzh3JtA/edit#heading=h.spiwwyows3cr).
 
-Welcome to HashiCorp Developer! This is the home for HashiCorp product reference documentation, along with all other kinds of content for our practitioners.
+> **Content Authors** Please see [this documentation](./src/content/README.md) for contributing content updates to Developer. Reach out in [#proj-dev-portal](https://hashicorp.slack.com/archives/C01KCU4HDPY) on Slack if you have any issues / questions.
 
-For background information on this project, refer to [[MKTG-034]](https://docs.google.com/document/d/1ASyBOCWWP8VUahbL5c5y0qrDMgqhYdXJ2h15xzh3JtA/edit#heading=h.spiwwyows3cr).
+## Table of contents
 
-To track the progress of this project, refer to the [Dev Portal Asana Portfolio](https://app.asana.com/0/portfolio/1200682159451359/list) and join [#proj-dev-portal](https://hashicorp.slack.com/archives/C01KCU4HDPY) on slack.
+- [Local Development](#local-development)
+- [Accessibility](#accessibility)
+- [Testing](#testing)
+- [Helpers](#helpers)
+- [Component Organziation](#component-organization)
+- [Configuration](#configuration)
+- [Analytics](#analytics)
+- [SEO metadata](#seo-metadata)
+- [Performance](#performance)
+- [Remote Content & Application context](#remote-content--application-context)
 
 ## Local Development
+
+### Setting Up Environment Variables
+
+There are a few things you need to set up before you can begin developing in this repository.
+
+1. [Install the Vercel CLI](https://vercel.com/cli)
+
+   The CLI is needed for the next 2 steps.
+
+2. Run `vercel link`
+
+   This command will prompt you to connect your local copy of repo to [the Vercel `dev-portal` project](https://vercel.com/hashicorp/dev-portal). The command creates a `.vercel` directory with a JSON file that contains the information that links to the Vercel project.
+
+3. Run `vercel env pull .env.local`
+
+   This command will pull the development environment variables from the linked Vercel project and write them to a new file called `.env.local`.
+
+4. Remove the line containing `VERCEL="1"` from `.env.local`.
+
+   This step is required to prevent the login flow from using HTTPS URLs.
+
+### Running The Project
+
+If you're developing in this repository, get started by running:
+
+```
+npm install
+npm start
+```
+
+This will give you a development server running on [localhost:3000](http://localhost:3000).
+
+> **Note**: Historically, the `.io` sites were served from this repository. They have been migrated into [the hashicorp/web repository](https://github.com/hashicorp/web). See [this RFC](https://docs.google.com/document/d/1iLx2jL09YkLbhSXdK9ScSedwSiujYDEa524FejOAnZM/) for full context.
+
+### Running in a Docker container
+
+If using `npm` isn't working for you, you can try running the website through the Docker container instead.
+
+1. Build the docker container and tag it with something memorable, e.g. `dev-portal`:
+
+   ```shell-session
+   $ docker build -t dev-portal .
+   [+] Building 115.2s (16/16) FINISHED
+   => => naming to docker.io/library/dev-portal 
+   ```
+1. Run the container, making sure to export port 3000 and mount the local source files into it:
+
+   ```shell-session
+   $ docker run -it -v $(pwd)/src:/app/website-preview/src -p 3000:3000 dev-portal
+   ...
+   > Ready on http://localhost:3000
+   ```
+
+Now you can view the website on http://localhost:3000 and any local edits will be reflected on the rendered page.
 
 ### Installing Recommended VS Code Extensions
 
@@ -29,48 +92,27 @@ In the `.vscode` directory, you'll find [a `settings.json` file](./.vscode/setti
 - `source.fixAll.eslint` enables auto-fixing of eslint issues when a file is saved
 - `eslint.codeActionsOnSave.rules` specifies which rules can be auto-fixed on save
 
-### Setting Up Environment Variables
+## Accessibility
 
-There are a few things you need to set up before you can begin developing in this repository.
+`@axe-core/react` is a package that allows us to run accessibility checks against the rendered DOM and see results in a browser dev tools console.
 
-1. [Install the Vercel CLI](https://vercel.com/cli)
+_\*\* Note: it is recommended to use Chrome. There is limited functionality in Safari and Firefox_
 
-   The CLI is needed for the next 2 steps.
+### Why is it used in `dev-portal`?
 
-2. Run `vercel link`
+We use it for local accessibility testing of the DOM. It does not replace other tools like linting rules and tools like linting rules also do not replace this tool. Both kinds of tools are important for different reasons. Linters can help us write accessible code and form good habits, but they can't check the full output of the code. Tools that check the DOM ensure that the final state of elements is accessible including all calculated text and colors.
 
-   This command will prompt you to connect your local copy of repo to [the Vercel `dev-portal` project](https://vercel.com/hashicorp/dev-portal). The command creates a `.vercel` directory with a JSON file that contains the information that links to the Vercel project.
+### How do I use it as a development tool?
 
-3. Run `vercel env pull .env.local`
-
-   This command will pull the development environment variables from the linked Vercel project and write them to a new file called `.env.local`.
-
-Additionally, you can add a GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) to prevent running into GitHub's API rate limit for unauthenticated requests by adding `GITHUB_TOKEN` to your `.env.local`.
-
-### Running The Project
-
-If you're developing in this repository, get started by running:
+The code is set up in [`_app.tsx`](/src/pages/_app.tsx) to only use `react-dom` and `@axe-core/react` if the `AXE_ENABLED` environment variable is set. We've added an npm script to make setting that variable easy. To run the app locally with `@axe-core/react` enabled, run the following command in your terminal instead of `npm start`:
 
 ```
-npm install
-npm start
+npm run start:with-axe
 ```
 
-This will give you a development server running on [localhost:3000](http://localhost:3000).
+After you've got the project running locally with `AXE_ENABLED` set, you can open a browser to the local server and look at the dev tools console and inspect the console logs output by `@axe-core/react`.
 
-To preview the co-located `.io` project sites, you can run variations on the `npm start` command:
-
-```sh
-npm run start:boundary # https://www.boundaryproject.io
-npm run start:nomad # https://www.nomadproject.io
-npm run start:sentinel # https://docs.hashicorp.com/sentinel
-npm run start:vault # https://www.vaultproject.io
-npm run start:waypoint # https://www.boundaryproject.io
-```
-
-These commands set the `DEV_IO` env variable in order to simulate the environment we use to deploy the `.io` sites. Further details on the local preview processes for the `.io` sites can be found in [MKTG-040 RFC](https://docs.google.com/document/d/1iLx2jL09YkLbhSXdK9ScSedwSiujYDEa524FejOAnZM/edit) and in the [corresponding Digital RFC](https://docs.google.com/document/d/1tvEhrLF0YyRimgR-Ibd_lo7sqTvw0TFAi77jbgjROVk/edit).
-
-### Testing
+## Testing
 
 We use [jest](https://jestjs.io/) to write unit tests for our code. We also have [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) integrated for writing tests against our rendered React components.
 
@@ -100,7 +142,18 @@ To view the report for an end-to-end test run:
 npx playwright show-report
 ```
 
-### Component Organization
+## Helpers
+
+### Reset with `clean`
+
+Auto-populated subdirectories such as `.next` and `node_modules` can sometimes become out of date. Delete all related subdirectories with the `clean` command.
+
+```
+npm install
+npm run clean
+```
+
+## Component Organization
 
 In order to create some structure and consistency throughout this project, we're creating some light guidelines around where certain components should live. We have three top-level folders which should house components:
 
@@ -116,6 +169,7 @@ src/
 - **`components`** - Shareable, smaller components for use across any number of other components
 - **`views`** - Componentry which represents a full site "view." This is a way to abstract out page components and easily co-locate related code. Not necessarily intended for re-use, unless one needs to render the same view on multiple pages. This also allows us to co-locate sub-components and test files with page components, which is otherwise difficult with file-based routing
 - **`layouts`** - Layout components which are generic and possibly used across different pages (see [Next.js docs](https://nextjs.org/docs/basic-features/layouts#per-page-layouts))
+  - **Note**: In support of future app-router adoption, we are no longer using the `.layout` or `.getLayout` pattern, which is not supported in the app directory.
 - **`hooks`** - Shared hooks which are applicable for use across a variety of other components. Hooks which access shared contexts should live in `contexts/` (see below)
 - **`contexts`** - Shared [contexts](https://reactjs.org/docs/context.html) and utilities for accessing / interacting with the context values
 
@@ -127,19 +181,22 @@ import SomePageView from 'views/some-page'
 import SomeLayout from 'layouts/some-layout'
 
 // if we need to adjust props, can wrap this to make any changes necessary
-const SomePage = SomePageView
-SomePage.layout = SomeLayout
-
-export default SomePage
+export default function SomePage(props) {
+	return (
+		<SomeLayout>
+			<SomePageView {...props} />
+		</SomeLayout>
+	)
+}
 ```
 
-### Configuration
+## Configuration
 
-Per-environment configuration values are defined in JSON files in the `config/` folder. Each environment has its own config file, currently:
+Per-environment configuration values are defined in JSON files in the `config/` folder. Each environment has its own config file, controlled by the `HASHI_ENV` environment variable, currently:
 
 ```
 config/
-  base.json # Not used directly (see below)
+  base.json # May be used in any environment, including production (see below)
   development.json
   preview.json
   production.json
@@ -159,9 +216,15 @@ The configuration values are available globally within the application. They can
 console.log(__config.my_config_value)
 ```
 
-Configuration files should be used for any non-sensitive configuration values needed throughout the application which might vary by environment. Consider API endpoints, constants, and flags in scope for the configuration files.
+Configuration files should be used for any non-sensitive configuration values needed throughout the application which might vary by environment. Consider API endpoints, constants, and flags in scope for the configuration files. Any references to `__config` are replaced at build-time with the values from the environment's configuration file using [Webpack's DefinePlugin](https://webpack.js.org/plugins/define-plugin/).
 
-### Analytics
+## Search
+
+We're using [Algolia](https://www.algolia.com/) to make the repository searchable. The search index is automatically updated when content changes are pushed in the various content repositories. The scripts to update the search index live in `mktg-content-workflows`: [docs](https://github.com/hashicorp/mktg-content-workflows/tree/main/workflows/update-search-index), [tutorials](https://github.com/hashicorp/mktg-content-workflows/tree/main/workflows/update-search-index-tutorials), and [integrations](https://github.com/hashicorp/mktg-content-workflows/tree/main/workflows/algolia-sync/sources/integrations).
+
+The `main` branch and all preview builds use the production Algolia index, `prod_DEVDOT_omni`. To use the staging index, `staging_DEVDOT_omni`, update the [algolia config value](https://github.com/hashicorp/dev-portal/blob/3d0c59d51240798f42fd3ce79b9e30a47371784f/config/base.json#L11-L15).
+
+## Analytics
 
 Calls to `window.analytics.track()` are logged in development for easy iteration while adding analytics code. If you would prefer to reduce the noise created by these logs, start the app with `NEXT_PUBLIC_ANALYTICS_LOG_LEVEL=0`:
 
@@ -175,14 +238,14 @@ The meta tags for the site are rendered by the [`HeadMetadata`](./src/components
 
 ```ts
 export async function getStaticProps() {
-  return {
-    props: {
-      metadata: {
-        title: 'My Page', // Will be joined with the root site title
-        description: 'This is a cool page',
-      },
-    },
-  }
+	return {
+		props: {
+			metadata: {
+				title: 'My Page', // Will be joined with the root site title
+				description: 'This is a cool page',
+			},
+		},
+	}
 }
 ```
 
@@ -194,10 +257,22 @@ Social card images / OpenGraph images live in [`/public/og-image/`](./public/og-
 
 We use the [Next.js Bundle Analysis GitHub Action](https://github.com/hashicorp/nextjs-bundle-analysis) to track the size of our JavaScript bundles generated by Next.js's build step. To speed up the execution of the analysis step, we also have a [custom build script](./scripts/next-build-webpack-only.ts) which prevents the execution of the static generation build step, short-circuiting the Next.js build after the webpack compilation is finished.
 
-## Documentation Content
+## Remote Content & Application context
 
-Documentation for each product is sourced from its respective product repository, and served via Digital's [content API](https://github.com/hashicorp/mktg-content-workflows/#get-apicontentproductfullpath)
+This application pulls content from multiple different repositories (remote content) through our [Learn API](https://github.com/hashicorp/learn-api), [content API](https://github.com/hashicorp/mktg-content-workflows), [integrations API](https://github.com/hashicorp/integrations-api), from the local filesystem, as well as directly from the GitHub API. In order to facilitate development and previewing of this content, the application can be run within the context of one of these source repositories. In this scenario, we want to read
+content from the filesystem for that specific source. This can be distilled down into three specific contexts that need to be handled for any remote content:
 
-## Repository Documentation
+- Running the application in this repository (`hashicorp/dev-portal`): all content is sourced remotely
+- Running the application in a content's source repository (e.g. vault docs in `hashicorp/vault`): all content from the repository is read from the file system
+- Running the application in a different source repository (e.g. waypoint docs in `hashicorp/vault`): content is sourced remotely if not from the current context
 
-Additional documentation for this repository is located in the [docs directory](./docs/README.md).
+> Note: For content which is read from the GitHub API, we try to minimize loading this content from the API in source repositories to reduce reliance on GitHub PATs
+
+If you are wiring up remote data which needs to change its loading strategy depending on the context, you can use `isDeployPreview()` from `lib/env-checks`:
+
+```ts
+import { isDeployPreview } from 'lib/env-checks'
+
+isDeployPreview() // in any source repository?
+isDeployPreview('vault') // in vault's source repository?
+```

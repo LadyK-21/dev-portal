@@ -1,46 +1,61 @@
-import { ReactElement } from 'react'
-import { useCurrentProduct } from 'contexts'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import Heading from 'components/heading'
 import IconTileLogo from 'components/icon-tile-logo'
-import Text from 'components/text'
+import VersionContextSwitcher, {
+	VersionContextSwitcherProps,
+} from 'components/version-context-switcher'
+import { ChangeEvent, ReactElement } from 'react'
+import { ProductSlug } from 'types/products'
 import { useCurrentVersion } from 'views/product-downloads-view/contexts'
-import { getPageSubtitle } from 'views/product-downloads-view/helpers'
 import s from './page-header.module.css'
 
-const PageHeader = (): ReactElement => {
-  const currentProduct = useCurrentProduct()
-  const { currentVersion, isLatestVersion } = useCurrentVersion()
-  const pageTitle = `Install ${currentProduct.name}`
-  const pageSubtitle = getPageSubtitle({
-    productName: currentProduct.name,
-    version: currentVersion,
-    isLatestVersion,
-  })
+interface PageHeaderProps {
+	isEnterpriseMode: boolean
+	product: { name: string; slug: ProductSlug }
+	versionSwitcherOptions: VersionContextSwitcherProps['options']
+}
 
-  return (
-    <div className={s.root}>
-      <IconTileLogo
-        className={s.iconTileLogo}
-        productSlug={
-          currentProduct.slug === 'sentinel' ? 'hcp' : currentProduct.slug
-        }
-      />
-      <div>
-        <Heading
-          className={s.pageHeaderTitle}
-          level={1}
-          size={500}
-          id={`install-${currentProduct.slug}`}
-          weight="bold"
-        >
-          {pageTitle}
-        </Heading>
-        <Text className={s.pageHeaderSubtitle} size={300} weight="regular">
-          {pageSubtitle}
-        </Text>
-      </div>
-    </div>
-  )
+const PageHeader = ({
+	isEnterpriseMode = false,
+	product,
+	versionSwitcherOptions,
+}: PageHeaderProps): ReactElement => {
+	const { setCurrentVersion } = useCurrentVersion()
+
+	const pageTitle = isEnterpriseMode
+		? `${product.name} Enterprise Installation`
+		: `Install ${product.name}`
+
+	const productSlug = (
+		product.slug === 'sentinel' ? 'hcp' : product.slug
+	) as Exclude<ProductSlug, 'sentinel'>
+
+	return (
+		<div className={s.root}>
+			<div className={s.headingWrapper}>
+				<IconTileLogo className={s.iconTileLogo} productSlug={productSlug} />
+				<Heading
+					className={s.pageHeaderTitle}
+					level={1}
+					size={500}
+					id={`install-${product.slug}`}
+					weight="bold"
+				>
+					{pageTitle}
+				</Heading>
+			</div>
+			<VersionContextSwitcher
+				onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+					setCurrentVersion(e.target.value)
+				}
+				options={versionSwitcherOptions}
+			/>
+		</div>
+	)
 }
 
 export default PageHeader

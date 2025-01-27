@@ -1,24 +1,15 @@
-import terraformData from 'data/terraform.json'
-import { ProductData } from 'types/products'
-import { getStaticGenerationFunctions } from 'layouts/sidebar-sidecar/server'
-import DocsView from 'views/docs-view'
-
-const basePath = 'internals'
-const baseName = 'Internals'
-const product = terraformData as ProductData
 /**
- * TODO: productSlug should possibly actually be `terraform`,
- * but https://mktg-content-api.vercel.app/api/content/terraform/version-metadata?partial=true
- * does not return any version with "isLatest: true"
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
  */
-const productSlugForLoader = 'terraform-website'
 
-const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions({
-  product,
-  productSlugForLoader,
-  basePath,
-  baseName,
-})
+import DocsView from 'views/docs-view'
+import { getRootDocsPathGenerationFunctions } from 'views/docs-view/utils/get-root-docs-path-generation-functions'
 
-export { getStaticPaths, getStaticProps }
+const { getStaticPaths, getStaticProps } = getRootDocsPathGenerationFunctions(
+	'terraform',
+	'internals'
+)
+
+export { getStaticProps, getStaticPaths }
 export default DocsView

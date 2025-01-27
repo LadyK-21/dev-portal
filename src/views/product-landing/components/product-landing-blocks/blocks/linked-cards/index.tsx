@@ -1,23 +1,26 @@
-import { LinkedCard, LinkedCardsProps } from './types'
-import CardsGridList from 'components/cards-grid-list'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import CardLink from 'components/card-link'
-import { CardBody, CardHeading } from 'components/tutorial-collection-cards'
+import { CardDescription, CardTitle } from 'components/card/components'
+import CardsGridList from 'components/cards-grid-list'
+import { LinkedCard, LinkedCardsProps } from './types'
 
 function LinkedCards({ cards }: LinkedCardsProps) {
-  return (
-    <CardsGridList>
-      {cards.map((card: LinkedCard, idx: number) => {
-        return (
-          <li key={idx}>
-            <CardLink href={card.url}>
-              <CardHeading level={3} text={card.heading} />
-              <CardBody text={card.body} />
-            </CardLink>
-          </li>
-        )
-      })}
-    </CardsGridList>
-  )
+	return (
+		<CardsGridList>
+			{cards.map((card: LinkedCard) => {
+				return (
+					<CardLink key={card.url} ariaLabel={card.heading} href={card.url}>
+						<CardTitle text={card.heading} />
+						<CardDescription text={card.body} />
+					</CardLink>
+				)
+			})}
+		</CardsGridList>
+	)
 }
 
 export type { LinkedCardsProps }

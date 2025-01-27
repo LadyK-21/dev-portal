@@ -1,82 +1,162 @@
-import { GetStaticPropsResult } from 'next'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { ProductData } from 'types/products'
 import { generateStaticProps as generateReleaseStaticProps } from 'lib/fetch-release-data'
-import { getInlineContentMaps } from 'lib/tutorials/get-inline-content-maps'
 import { stripUndefinedProperties } from 'lib/strip-undefined-props'
-import { formatCollectionCard } from 'components/collection-card/helpers'
-import { formatTutorialCard } from 'components/tutorial-card/helpers'
 import {
-  FeaturedLearnContent,
-  ProductDownloadsViewStaticProps,
-  RawProductDownloadsViewContent,
-  FeaturedLearnCard,
+	ProductDownloadsViewStaticProps,
+	RawProductDownloadsViewContent,
+	FeaturedTutorialCard,
+	FeaturedCollectionCard,
 } from './types'
+import {
+	generateFeaturedCollectionsCards,
+	generateFeaturedTutorialsCards,
+	generateDefaultPackageManagers,
+	generateEnterprisePackageManagers,
+	sortAndFilterReleaseVersions,
+} from './helpers'
+import { generatePackageManagers } from './server-helpers'
+import { hasHcpCalloutContent } from 'components/try-hcp-callout/content'
 
-/**
- * Prepares static props for downloads views
- */
-async function generateStaticProps(
-  productData: ProductData,
-  pageContent: RawProductDownloadsViewContent
-): Promise<GetStaticPropsResult<ProductDownloadsViewStaticProps>> {
-  /**
-   * Fetch the release data static props
-   */
-  const { props: releaseProps, revalidate } = await generateReleaseStaticProps(
-    productData
-  )
-  const { releases, product, latestVersion } = releaseProps
-
-  /**
-   * Fetch page content
-   * (loaded from .json, then tutorial data is fetched)
-   */
-  const {
-    doesNotHavePackageManagers,
-    featuredLearnContent,
-    packageManagerOverrides,
-    sidecarMarketingCard,
-    sidebarMenuItems,
-  } = pageContent
-  // Gather tutorials and collections based on slugs used
-  const inlineContent = await getInlineContentMaps(featuredLearnContent)
-  // Transform feature tutorial and collection entries into card data
-  const featuredLearnCards: FeaturedLearnCard[] = featuredLearnContent.map(
-    (entry: FeaturedLearnContent) => {
-      const { collectionSlug, tutorialSlug } = entry
-      if (typeof collectionSlug == 'string') {
-        const collectionData = inlineContent.inlineCollections[collectionSlug]
-        return { type: 'collection', ...formatCollectionCard(collectionData) }
-      } else if (typeof tutorialSlug == 'string') {
-        const tutorialData = inlineContent.inlineTutorials[tutorialSlug]
-        const defaultContext = tutorialData.collectionCtx.default
-        const tutorialLiteCompat = { ...tutorialData, defaultContext }
-        return { type: 'tutorial', ...formatTutorialCard(tutorialLiteCompat) }
-      }
-    }
-  )
-
-  /**
-   * Combine release data and page content
-   */
-  return {
-    props: stripUndefinedProperties({
-      metadata: {
-        title: 'Install',
-      },
-      releases,
-      product,
-      latestVersion,
-      pageContent: {
-        doesNotHavePackageManagers,
-        featuredLearnCards,
-        packageManagerOverrides,
-        sidecarMarketingCard,
-        sidebarMenuItems,
-      },
-    }),
-    revalidate,
-  }
+interface GenerateStaticPropsOptions {
+	isEnterpriseMode?: boolean
+	releaseSlug?: string
+	jsonFilePath?: string
+	installName?: string
 }
 
-export { generateStaticProps }
+const generateGetStaticProps = (
+	product: ProductData,
+	options: GenerateStaticPropsOptions = {}
+) => {
+	const { isEnterpriseMode = false } = options
+
+	return async (): Promise<{
+		props: ProductDownloadsViewStaticProps
+		revalidate: number
+	}> => {
+		let jsonFilePath = join(
+			process.cwd(),
+			`src/content/${product.slug}/install-landing.json`
+		)
+
+		if (options.jsonFilePath) {
+			const staticPath = join(process.cwd(), options.jsonFilePath)
+			if (existsSync(staticPath)) {
+				jsonFilePath = staticPath
+			}
+		}
+
+		const CONTENT: RawProductDownloadsViewContent = JSON.parse(
+			readFileSync(jsonFilePath, 'utf8')
+		)
+
+		const {
+			doesNotHavePackageManagers,
+			featuredCollectionsSlugs,
+			featuredTutorialsSlugs,
+			packageManagerOverrides,
+			sidebarMenuItems,
+			sidecarMarketingCard,
+			sidecarHcpCallout: rawSidecarHcpCallout,
+		} = CONTENT
+		/**
+		 * Fetch the release data static props
+		 */
+		const { props: releaseProps, revalidate } =
+			await generateReleaseStaticProps(
+				options.releaseSlug || product,
+				isEnterpriseMode
+			)
+		const { releases, latestVersion } = releaseProps
+		const sortedAndFilteredVersions = sortAndFilterReleaseVersions({
+			releaseVersions: releases.versions,
+			isEnterpriseMode,
+		})
+
+		/**
+		 * Transform featured collection entries into card data
+		 */
+		let featuredCollectionCards: FeaturedCollectionCard[]
+		if (featuredCollectionsSlugs && featuredCollectionsSlugs.length > 0) {
+			featuredCollectionCards = await generateFeaturedCollectionsCards(
+				featuredCollectionsSlugs
+			)
+		}
+
+		/**
+		 * Transform featured tutorial entries into card data
+		 */
+		let featuredTutorialCards: FeaturedTutorialCard[]
+		if (featuredTutorialsSlugs && featuredTutorialsSlugs.length > 0) {
+			featuredTutorialCards = await generateFeaturedTutorialsCards(
+				featuredTutorialsSlugs
+			)
+		}
+
+		/**
+		 * Build package manager data
+		 */
+		const packageManagers = doesNotHavePackageManagers
+			? []
+			: await generatePackageManagers({
+					defaultPackageManagers: isEnterpriseMode
+						? generateEnterprisePackageManagers(product)
+						: generateDefaultPackageManagers(product),
+					packageManagerOverrides: packageManagerOverrides,
+			  })
+
+		/**
+		 * Build the sidecar HCP callout card
+		 */
+		let sidecarHcpCallout
+		const isHcpProduct = hasHcpCalloutContent(product.slug)
+		const hasContent = typeof rawSidecarHcpCallout !== 'undefined'
+		if (hasContent && isHcpProduct) {
+			sidecarHcpCallout = {
+				...rawSidecarHcpCallout,
+				productSlug: product.slug,
+			}
+		} else if (hasContent) {
+			console.warn(
+				`In "product-downloads-view", for product slug "${product.slug}", "sidecarHcpCallout" content was provided, but the Try HCP callout component cannot be rendered as "${product.slug}" is not recognized as a product with an HCP offering. Please ensure "sidecarHcpCallout" content only exists for products with HCP offerings, or report this as a bug.`
+			)
+		}
+
+		/**
+		 * Combine release data and page content
+		 */
+		const props = stripUndefinedProperties({
+			isEnterpriseMode,
+			latestVersion,
+			metadata: {
+				title: 'Install',
+			},
+			pageContent: {
+				featuredCollectionCards,
+				featuredTutorialCards,
+				installName: options.installName,
+				sidebarMenuItems,
+				sidecarMarketingCard,
+				sidecarHcpCallout,
+			},
+			product,
+			releases,
+			sortedAndFilteredVersions,
+			packageManagers,
+		})
+
+		return {
+			props,
+			revalidate,
+		}
+	}
+}
+
+export { generateGetStaticProps }

@@ -1,6 +1,10 @@
-import { LearnProductSlug } from 'types/products'
-import getIsBetaProduct from 'lib/get-is-beta-product'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { splitProductFromFilename } from 'views/tutorial-view/utils'
+import { normalizeSlugForDevDot } from 'lib/tutorials/normalize-product-like-slug'
 
 /**
  * takes db slug format --> waypoint/intro
@@ -12,23 +16,38 @@ import { splitProductFromFilename } from 'views/tutorial-view/utils'
  */
 
 export function getTutorialSlug(
-  tutorialDbSlug: string,
-  collectionDbSlug: string
+	tutorialDbSlug: string,
+	collectionDbSlug: string
 ): string {
-  const [product, collectionFilename] = collectionDbSlug.split('/')
-  const tutorialFilename = splitProductFromFilename(tutorialDbSlug)
-  return `/${product}/tutorials/${collectionFilename}/${tutorialFilename}`
+	const [rawProductSlug, collectionFilename] = collectionDbSlug.split('/')
+	const tutorialFilename = splitProductFromFilename(tutorialDbSlug)
+
+	// @TODO genericize this to use 'topic' or 'section' instead of 'product'
+	if (
+		rawProductSlug === 'well-architected-framework' ||
+		rawProductSlug === 'validated-patterns'
+	) {
+		return `/${collectionDbSlug}/${tutorialFilename}`
+	}
+
+	// rawProductSlug may be "cloud", needs to be "hcp" for Dev Dot purposes
+	const productSlug = normalizeSlugForDevDot(rawProductSlug)
+	return `/${productSlug}/tutorials/${collectionFilename}/${tutorialFilename}`
 }
 
 export function getCollectionSlug(collectionDbSlug: string): string {
-  const [product, collectionFilename] = collectionDbSlug.split('/')
-  const isBetaProduct = getIsBetaProduct(product as LearnProductSlug)
+	const [rawProductSlug, collectionFilename] = collectionDbSlug.split('/')
 
-  // if not a 'sanctioned product', link externally to Learn
-  // interim solution for BETA where not all products are onboarded
-  if (!isBetaProduct) {
-    return `https://learn.hashicorp.com/collections/${collectionDbSlug}`
-  }
+	// @TODO genericize this to use 'topic' or 'section' instead of 'product'
+	if (
+		rawProductSlug === 'well-architected-framework' ||
+		rawProductSlug === 'validated-patterns'
+	) {
+		return `/${collectionDbSlug}`
+	}
 
-  return `/${product}/tutorials/${collectionFilename}`
+	// rawProductSlug may be "cloud", needs to be "hcp" for Dev Dot purposes
+	const productSlug = normalizeSlugForDevDot(rawProductSlug)
+
+	return `/${productSlug}/tutorials/${collectionFilename}`
 }

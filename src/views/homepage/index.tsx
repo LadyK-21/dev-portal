@@ -1,77 +1,61 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // Third-party imports
 import { ReactElement } from 'react'
 
 // Global imports
-import { productSlugs } from 'lib/products'
-import BaseNewLayout from 'layouts/base-new'
-import Text from 'components/text'
+import BaseLayout from 'layouts/base-layout'
+import MobileMenuLevelsGeneric from 'components/mobile-menu-levels-generic'
 
 // Local imports
-import { HomePageProps, HomePageContentProps } from './types'
-import PreFooter from './components/pre-footer'
-import ProductNav from './components/product-nav'
-import LearnSection from './components/learn-section'
-import MerchandisingSlots from './components/merchandising-slots'
-import { HeroWithVideo } from './components/hero'
 import {
-  HashiConfGlobalSlot,
-  VaultSlot,
-} from './components/merchandising-slots/slots'
+	Chiclets,
+	FeaturedContentGrid,
+	PageTitle,
+	PreFooter,
+} from './components'
 import s from './homepage.module.css'
 
-const productNavSlugs = productSlugs.filter((slug) => slug !== 'sentinel')
-
-const HomePageContent = ({
-  hero,
-  merchandising,
-  learnSection,
-  preFooter,
-  navNotice,
-}: HomePageContentProps) => {
-  return (
-    <div className={s.homepageContent}>
-      <HeroWithVideo
-        badgeText={hero.badgeText}
-        heading={hero.heading}
-        description={<Text>{hero.description}</Text>}
-        videoUrl="https://hashicorp.wistia.com/medias/031h9iogzx"
-        videoImageUrl="https://embed-ssl.wistia.com/deliveries/b65febe71ccfb5ded8d3958b1cf1ec61.jpg?image_crop_resized=960x540"
-      />
-      <ProductNav notice={navNotice} products={productNavSlugs} />
-      <MerchandisingSlots>
-        <VaultSlot
-          url={merchandising.vault.url}
-          cardTitle={merchandising.vault.cardTitle}
-          description={merchandising.vault.description}
-          ctaText={merchandising.vault.ctaText}
-        />
-        <HashiConfGlobalSlot
-          description={merchandising.hashiconfGlobal.description}
-        />
-      </MerchandisingSlots>
-      <LearnSection
-        imageSrc={learnSection.imageSrc}
-        heading={learnSection.heading}
-        description={learnSection.description}
-        collectionCards={learnSection.collectionCards}
-        link={learnSection.link}
-      />
-      <PreFooter
-        heading={preFooter.heading}
-        description={preFooter.description}
-        actions={preFooter.actions}
-      />
-    </div>
-  )
+function HomePageView(): ReactElement {
+	return (
+		<BaseLayout mobileMenuSlot={<MobileMenuLevelsGeneric />}>
+			<div className={s.root}>
+				<div className={s.background} />
+				<div className={s.limitedWidthContainer}>
+					<PageTitle />
+					<Chiclets />
+					<FeaturedContentGrid />
+					<PreFooter
+						heading="Looking for help?"
+						description="We offer paid support, a free forum, and other community resources."
+						actions={[
+							{
+								icon: 'support',
+								heading: 'Support',
+								description: 'Open a support ticket',
+								link: 'https://support.hashicorp.com/hc/en-us',
+							},
+							{
+								icon: 'help',
+								heading: 'Forum',
+								description: 'Find your answer on the forum',
+								link: 'https://discuss.hashicorp.com/',
+							},
+							{
+								icon: 'user',
+								heading: 'Community',
+								description: 'Join our community',
+								link: 'https://www.hashicorp.com/community',
+							},
+						]}
+					/>
+				</div>
+			</div>
+		</BaseLayout>
+	)
 }
 
-function HomePageView({ content }: HomePageProps): ReactElement {
-  return (
-    <div className={s.homepage}>
-      <HomePageContent {...content} />
-    </div>
-  )
-}
-
-HomePageView.layout = BaseNewLayout
 export default HomePageView

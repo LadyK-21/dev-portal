@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { DisclosureContent } from 'components/disclosure'
 import { validateNavigationDisclosureContentChildren } from 'components/navigation-disclosure/helpers'
 import { NavigationDisclosureContentProps } from './types'
@@ -8,12 +13,12 @@ import { NavigationDisclosureContentProps } from './types'
  * @see https://developer.hashi-mktg.com/swingset/components/navigationdisclosure
  */
 const NavigationDisclosureContent = ({
-  children,
-  className,
+	children,
+	className,
 }: NavigationDisclosureContentProps) => {
-  validateNavigationDisclosureContentChildren(children)
+	validateNavigationDisclosureContentChildren(children)
 
-  return <DisclosureContent className={className}>{children}</DisclosureContent>
+	return <DisclosureContent className={className}>{children}</DisclosureContent>
 }
 
 export type { NavigationDisclosureContentProps }

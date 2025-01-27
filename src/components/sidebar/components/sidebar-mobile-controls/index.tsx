@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import classNames from 'classnames'
 import { IconChevronLeft16 } from '@hashicorp/flight-icons/svg-react/chevron-left-16'
 import { IconChevronRight16 } from '@hashicorp/flight-icons/svg-react/chevron-right-16'
@@ -11,22 +16,22 @@ import s from './sidebar-mobile-controls.module.css'
  * both buttons.
  */
 const BaseControlButton = ({
-  className,
-  icon,
-  iconPosition,
-  onClick,
-  text,
+	className,
+	icon,
+	iconPosition,
+	onClick,
+	text,
 }: ButtonProps) => {
-  return (
-    <Button
-      className={className}
-      color="tertiary"
-      icon={icon}
-      iconPosition={iconPosition}
-      onClick={onClick}
-      text={text}
-    />
-  )
+	return (
+		<Button
+			className={className}
+			color="tertiary"
+			icon={icon}
+			iconPosition={iconPosition}
+			onClick={onClick}
+			text={text}
+		/>
+	)
 }
 
 /**
@@ -38,15 +43,15 @@ const BaseControlButton = ({
  *  - Always displays on the lefthand side of the `Sidebar`.
  */
 const LevelUpButton = ({ onClick, text }: ButtonProps) => {
-  return (
-    <BaseControlButton
-      className={s.levelUpButton}
-      icon={<IconChevronLeft16 />}
-      iconPosition="leading"
-      onClick={onClick}
-      text={text}
-    />
-  )
+	return (
+		<BaseControlButton
+			className={s.levelUpButton}
+			icon={<IconChevronLeft16 />}
+			iconPosition="leading"
+			onClick={onClick}
+			text={text}
+		/>
+	)
 }
 /**
  * The `Button` that handles moving the user "down" one nav data level in
@@ -59,21 +64,30 @@ const LevelUpButton = ({ onClick, text }: ButtonProps) => {
  *  - If rendered alone, displays on the lefthand side of the `Sidebar`.
  */
 const LevelDownButton = ({ onClick, text }: ButtonProps) => {
-  return (
-    <BaseControlButton
-      className={s.levelDownButton}
-      icon={<IconChevronRight16 />}
-      iconPosition="trailing"
-      onClick={onClick}
-      text={text}
-    />
-  )
+	return (
+		<BaseControlButton
+			className={s.levelDownButton}
+			icon={<IconChevronRight16 />}
+			iconPosition="trailing"
+			onClick={onClick}
+			text={text}
+		/>
+	)
 }
 
-interface SidebarMobileControlsProps {
-  levelUpButtonText: ButtonProps['text']
-  levelDownButtonText: ButtonProps['text']
-}
+/**
+ * One or both of `levelUp` and `levelDown`
+ * `ButtonText` properties must be provided.
+ */
+type SidebarMobileControlsProps =
+	| {
+			levelUpButtonText?: ButtonProps['text']
+			levelDownButtonText: ButtonProps['text']
+	  }
+	| {
+			levelUpButtonText: ButtonProps['text']
+			levelDownButtonText?: ButtonProps['text']
+	  }
 
 /**
  * Handles rendering either one or both of `LevelUpButton` and
@@ -81,41 +95,41 @@ interface SidebarMobileControlsProps {
  * `SidebarNavDataContext` using the `useSidebarNavData` hook.
  */
 const SidebarMobileControls = ({
-  levelUpButtonText,
-  levelDownButtonText,
+	levelUpButtonText,
+	levelDownButtonText,
 }: SidebarMobileControlsProps) => {
-  const { hasManyLevels, isFirstLevel, isLastLevel, setCurrentLevel } =
-    useSidebarNavData()
+	const { hasManyLevels, isFirstLevel, isLastLevel, setCurrentLevel } =
+		useSidebarNavData()
 
-  // Show `LevelUpButton` on all levels but the first one
-  let levelUpButton
-  if (hasManyLevels && !isFirstLevel) {
-    levelUpButton = (
-      <LevelUpButton
-        text={levelUpButtonText}
-        onClick={() => setCurrentLevel((prevLevel: number) => prevLevel - 1)}
-      />
-    )
-  }
+	// Show `LevelUpButton` on all levels but the first one
+	let levelUpButton
+	if (hasManyLevels && !isFirstLevel) {
+		levelUpButton = (
+			<LevelUpButton
+				text={levelUpButtonText}
+				onClick={() => setCurrentLevel((prevLevel: number) => prevLevel - 1)}
+			/>
+		)
+	}
 
-  // Show `LevelDownButton` on all levels but the last one
-  let levelDownButton
-  if (hasManyLevels && !isLastLevel) {
-    levelDownButton = (
-      <LevelDownButton
-        text={levelDownButtonText}
-        onClick={() => setCurrentLevel((prevLevel: number) => prevLevel + 1)}
-      />
-    )
-  }
+	// Show `LevelDownButton` on all levels but the last one
+	let levelDownButton
+	if (hasManyLevels && !isLastLevel) {
+		levelDownButton = (
+			<LevelDownButton
+				text={levelDownButtonText}
+				onClick={() => setCurrentLevel((prevLevel: number) => prevLevel + 1)}
+			/>
+		)
+	}
 
-  const atTopLevel = !levelUpButton && !!levelDownButton
-  return (
-    <div className={classNames(s.root, { [s.rightAlign]: atTopLevel })}>
-      {levelUpButton}
-      {levelDownButton}
-    </div>
-  )
+	const atTopLevel = !levelUpButton && !!levelDownButton
+	return (
+		<div className={classNames(s.root, { [s.rightAlign]: atTopLevel })}>
+			{levelUpButton}
+			{levelDownButton}
+		</div>
+	)
 }
 
 export type { SidebarMobileControlsProps }

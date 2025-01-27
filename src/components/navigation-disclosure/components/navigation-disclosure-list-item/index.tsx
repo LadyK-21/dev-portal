@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import classNames from 'classnames'
 import { validateNavigationDisclosureListItemChildren } from 'components/navigation-disclosure/helpers/validate-navigation-disclosure-list-item-children'
 import { NavigationDisclosureListItemProps } from './types'
@@ -10,12 +15,12 @@ import s from './navigation-disclosure-list-item.module.css'
  * @see https://developer.hashi-mktg.com/swingset/components/navigationdisclosure
  */
 const NavigationDisclosureListItem = ({
-  children,
-  className,
+	children,
+	className,
 }: NavigationDisclosureListItemProps) => {
-  validateNavigationDisclosureListItemChildren(children)
+	validateNavigationDisclosureListItemChildren(children)
 
-  return <li className={classNames(s.root, className)}>{children}</li>
+	return <li className={classNames(s.root, className)}>{children}</li>
 }
 
 export type { NavigationDisclosureListItemProps }

@@ -1,0 +1,64 @@
+{
+	"sidebarCategories": [
+		{
+			"name": "HCP Boundary",
+			"items": [
+				{
+					"name": "Quickstart",
+					"collectionSlug": "boundary/get-started-hcp"
+				},
+				{
+					"name": "Administration",
+					"collectionSlug": "boundary/hcp-administration"
+				}
+			]
+		},
+		{
+			"name": "HCP Consul Dedicated",
+			"items": [
+				{
+					"name": "Quickstart",
+					"collectionSlug": "consul/get-started-hcp"
+				},
+				{
+					"name": "Connect services",
+					"collectionSlug": "consul/hcp-connect-services"
+				}
+			]
+		},
+		{
+			"name": "HCP Packer",
+			"items": [
+				{ "name": "Quickstart", "collectionSlug": "packer/hcp-get-started" },
+				{ "name": "Fundamentals", "collectionSlug": "packer/hcp" },
+				{ "name": "Use Cases", "collectionSlug": "packer/cloud-production" }
+			]
+		},
+		{
+			"name": "HCP Vault Dedicated",
+			"items": [
+				{
+					"name": "Quickstart",
+					"collectionSlug": "vault/get-started-hcp-vault-dedicated"
+				},
+				{
+					"name": "Operations",
+					"collectionSlug": "vault/manage-hcp-vault-dedicated"
+				},
+				{
+					"name": "Kubernetes",
+					"collectionSlug": "vault/integrate-kubernetes-hcp-vault-dedicated"
+				}
+			]
+		},
+		{
+			"name": "HCP Waypoint",
+			"items": [
+				{
+					"name": "Quickstart",
+					"collectionSlug": "waypoint/hcp-waypoint"
+				}
+			]
+		}
+	]
+}

@@ -1,10 +1,26 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { ProductSlug } from 'types/products'
+
 interface SidebarSectionHeadingProps {
-  text: string
+	text: string
 }
 
 interface SidebarTitleHeadingProps {
-  id: string
-  text: string
+	id: string
+	text: string
 }
 
-export type { SidebarSectionHeadingProps, SidebarTitleHeadingProps }
+interface SidebarSectionBrandedHeadingProps {
+	text: string
+	theme?: ProductSlug
+}
+
+export type {
+	SidebarSectionHeadingProps,
+	SidebarTitleHeadingProps,
+	SidebarSectionBrandedHeadingProps,
+}

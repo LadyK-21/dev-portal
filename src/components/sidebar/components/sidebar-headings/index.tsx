@@ -1,5 +1,17 @@
-import { SidebarSectionHeadingProps, SidebarTitleHeadingProps } from './types'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import {
+	SidebarSectionHeadingProps,
+	SidebarTitleHeadingProps,
+	SidebarSectionBrandedHeadingProps,
+} from './types'
 import s from './sidebar-headings.module.css'
+import { isProductSlug } from 'lib/products'
+import ProductIcon from 'components/product-icon'
+import classNames from 'classnames'
 
 /**
  * Should be used for rendering the title of an entire Sidebar. There should
@@ -16,11 +28,11 @@ import s from './sidebar-headings.module.css'
  * See example 2 here: https://www.w3.org/WAI/tutorials/page-structure/headings/
  */
 const SidebarTitleHeading = ({ id, text }: SidebarTitleHeadingProps) => {
-  return (
-    <h2 className={s.root} id={id}>
-      {text}
-    </h2>
-  )
+	return (
+		<h2 className={s.root} id={id}>
+			{text}
+		</h2>
+	)
 }
 
 /**
@@ -31,7 +43,25 @@ const SidebarTitleHeading = ({ id, text }: SidebarTitleHeadingProps) => {
  * entire Sidebar.
  */
 const SidebarSectionHeading = ({ text }: SidebarSectionHeadingProps) => {
-  return <h3 className={s.root}>{text}</h3>
+	return <h3 className={s.root}>{text}</h3>
 }
 
-export { SidebarSectionHeading, SidebarTitleHeading }
+const SidebarSectionBrandedHeading = ({
+	text,
+	theme,
+}: SidebarSectionBrandedHeadingProps) => {
+	return (
+		<h3 className={classNames(s.brandedRoot, s[`theme-${theme}`])}>
+			{isProductSlug(theme) ? (
+				<ProductIcon className={s.icon} productSlug={theme} />
+			) : null}
+			<span className={s.text}>{text}</span>
+		</h3>
+	)
+}
+
+export {
+	SidebarSectionHeading,
+	SidebarTitleHeading,
+	SidebarSectionBrandedHeading,
+}

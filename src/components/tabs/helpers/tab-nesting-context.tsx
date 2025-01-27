@@ -1,12 +1,18 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { createContext, useContext, ReactNode } from 'react'
 
 type NestedTabContextValue = boolean
 
 export function useIsNested(): NestedTabContextValue {
-  return useContext(NestedTabContext)
+	return useContext(NestedTabContext)
 }
 
 const NestedTabContext = createContext<NestedTabContextValue>(false)
+NestedTabContext.displayName = 'NestedTabContext'
 
 /**
  * This provider allows <Tabs /> to be aware of nesting. Specifically,
@@ -14,13 +20,13 @@ const NestedTabContext = createContext<NestedTabContextValue>(false)
  * within wrapping <Tabs />.
  */
 export default function TabNestingProvider({
-  children,
+	children,
 }: {
-  children: ReactNode
+	children: ReactNode
 }) {
-  return (
-    <NestedTabContext.Provider value={true}>
-      {children}
-    </NestedTabContext.Provider>
-  )
+	return (
+		<NestedTabContext.Provider value={true}>
+			{children}
+		</NestedTabContext.Provider>
+	)
 }

@@ -1,20 +1,27 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 .root {
-  & ul {
-    list-style: none;
-    margin-left: 2rem;
+	& ul {
+		list-style: none;
+		margin-left: 8px;
 
-    & li {
-      color: #525252;
+		& li {
+			color: var(--token-color-foreground-primary);
+			position: relative;
 
-      &::before {
-        content: '';
-        display: block;
-        width: 18px;
-        margin-left: calc(-1 * 1.6rem);
-        height: 18px;
-        top: 7px;
-        background: url('./check-circle-filled.svg');
-      }
-    }
-  }
+			&::before {
+				content: '';
+				position: absolute;
+				display: block;
+				width: 18px;
+				margin-left: calc(-1 * 1.6rem);
+				height: 18px;
+				top: 4px;
+				background: url('./check-circle-filled.svg');
+			}
+		}
+	}
 }

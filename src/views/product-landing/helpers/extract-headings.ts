@@ -1,4 +1,9 @@
-import { TableOfContentsHeading } from 'layouts/sidebar-sidecar/components/table-of-contents'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { TableOfContentsHeading } from 'components/table-of-contents'
 import { ProductLandingViewProps } from '../types'
 import { ProductLandingBlock } from '../components/product-landing-blocks/types'
 
@@ -13,32 +18,32 @@ import { ProductLandingBlock } from '../components/product-landing-blocks/types'
  * So, deferred creating a generic implementation, for now.
  */
 export function extractHeadings(
-  content: ProductLandingViewProps['content']
+	content: ProductLandingViewProps['content']
 ): TableOfContentsHeading[] {
-  const headings: TableOfContentsHeading[] = [
-    {
-      title: content.overview.heading,
-      slug: content.overview.headingSlug,
-      level: 2,
-    },
-    {
-      title: content.get_started.heading,
-      slug: content.get_started.headingSlug,
-      level: 2,
-    },
-    ...content.blocks.reduce(
-      (acc: TableOfContentsHeading[], b: ProductLandingBlock) => {
-        if (b.type === 'heading') {
-          acc.push({
-            title: b.heading,
-            slug: b.headingSlug,
-            level: 2,
-          })
-        }
-        return acc
-      },
-      []
-    ),
-  ]
-  return headings
+	const headings: TableOfContentsHeading[] = [
+		{
+			title: content.overview.heading,
+			slug: content.overview.headingSlug,
+			level: 2,
+		},
+		{
+			title: content.get_started.heading,
+			slug: content.get_started.headingSlug,
+			level: 2,
+		},
+		...content.blocks.reduce(
+			(acc: TableOfContentsHeading[], b: ProductLandingBlock) => {
+				if (b.type === 'heading') {
+					acc.push({
+						title: b.heading,
+						slug: b.headingSlug,
+						level: 2,
+					})
+				}
+				return acc
+			},
+			[]
+		),
+	]
+	return headings
 }

@@ -1,17 +1,15 @@
-import nomadData from 'data/nomad.json'
-import { ProductData } from 'types/products'
-import { getStaticGenerationFunctions } from 'layouts/sidebar-sidecar/server'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import DocsView from 'views/docs-view'
+import { getRootDocsPathGenerationFunctions } from 'views/docs-view/utils/get-root-docs-path-generation-functions'
 
-const basePath = 'intro'
-const baseName = 'Intro'
-const product = nomadData as ProductData
+const { getStaticPaths, getStaticProps } = getRootDocsPathGenerationFunctions(
+	'nomad',
+	'intro'
+)
 
-const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions({
-  product,
-  basePath,
-  baseName,
-})
-
-export { getStaticPaths, getStaticProps }
+export { getStaticProps, getStaticPaths }
 export default DocsView

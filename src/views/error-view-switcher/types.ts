@@ -1,12 +1,11 @@
-export interface ErrorPageProps {
-  /**
-   * Error code to be recorded via window.analytics.track
-   */
-  statusCode: number
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
 
-  /**
-   * If the error page is being server on a dot-io domain,
-   * then isProxiedDotIo should be set to true.
-   */
-  isProxiedDotIo: boolean
+export interface ErrorPageProps {
+	/**
+	 * Error code to be recorded via window.analytics.track
+	 */
+	statusCode: number
 }

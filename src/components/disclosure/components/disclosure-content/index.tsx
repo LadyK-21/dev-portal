@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import classNames from 'classnames'
 import { useDisclosureState } from 'components/disclosure'
 import disclosureStyles from 'components/disclosure/disclosure.module.css'
@@ -9,16 +14,18 @@ import { DisclosureContentProps } from './types'
  * @see https://developer.hashi-mktg.com/swingset/components/disclosure
  */
 const DisclosureContent = ({ children, className }: DisclosureContentProps) => {
-  const { contentContainerId } = useDisclosureState()
+	const { contentContainerId, isOpen } = useDisclosureState()
 
-  return (
-    <div
-      className={classNames(disclosureStyles.contentContainer, className)}
-      id={contentContainerId}
-    >
-      {children}
-    </div>
-  )
+	return (
+		<div
+			className={classNames(disclosureStyles.contentContainer, className, {
+				[disclosureStyles.closedContentContainer]: !isOpen,
+			})}
+			id={contentContainerId}
+		>
+			{children}
+		</div>
+	)
 }
 
 export type { DisclosureContentProps }

@@ -1,32 +1,40 @@
-import { LinkProps } from 'next/link'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { LinkProps } from 'components/link'
 import { TextProps } from 'components/text'
 
-type NativeAnchorProps = JSX.IntrinsicElements['a']
+export interface InlineLinkProps extends LinkProps {
+	/**
+	 * The content to render within the `<a>` element.
+	 */
+	children: LinkProps['children']
 
-export interface InlineLinkProps {
-  /**
-   * The content to render within the `<a>` element.
-   */
-  children: NativeAnchorProps['children']
+	/**
+	 * A string of one or more class names. Applied last to the rendered `<a>`
+	 * element.
+	 */
+	className?: LinkProps['className']
 
-  /**
-   * A string of one or more class names. Applied last to the rendered `<a>`
-   * element.
-   */
-  className?: NativeAnchorProps['className']
+	/**
+	 * Text style color, defaults to primary
+	 * */
+	color?: 'primary' | 'secondary'
 
-  /**
-   * The destination of the link.
-   */
-  href: LinkProps['href']
+	/**
+	 * The destination of the link.
+	 */
+	href: LinkProps['href']
 
-  /**
-   * The `size` used to apply a `hds-typography-body-` CSS helper class.
-   */
-  textSize?: TextProps['size']
+	/**
+	 * The `size` used to apply a `hds-typography-body-` CSS helper class.
+	 */
+	textSize?: TextProps['size']
 
-  /**
-   * The `weight` used to apply a `hds-font-weight-` CSS helper class.
-   */
-  textWeight?: TextProps['weight']
+	/**
+	 * The `weight` used to apply a `hds-font-weight-` CSS helper class.
+	 */
+	textWeight?: TextProps['weight']
 }

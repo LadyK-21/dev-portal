@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import Script from 'next/script'
 
 /**
@@ -17,7 +22,7 @@ const datadogScriptBody = `(function(h,o,u,n,d) {
   d=o.createElement(u);d.async=1;d.src=n
   n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
 })(window,document,'script','${
-  __config.dev_dot.datadog_config.scriptUrl
+	__config.dev_dot.datadog_config.scriptUrl
 }','DD_RUM')
  DD_RUM.onReady(function() {
    DD_RUM.init({
@@ -28,29 +33,29 @@ const datadogScriptBody = `(function(h,o,u,n,d) {
      env: '${ENV}', 
      ${COMMIT_SHA ? `version: '${COMMIT_SHA}',` : ''}
      sampleRate: 100,
-     premiumSampleRate: 100,
+     premiumSampleRate: 0,
+     sessionReplaySampleRate: 0,
      trackInteractions: true,
      defaultPrivacyLevel: 'mask-user-input'
    })
-   DD_RUM.startSessionReplayRecording()
  })`
 
 function DatadogHeadTag() {
-  return (
-    <link rel="prefetch" href={__config.dev_dot.datadog_config.scriptUrl} />
-  )
+	return (
+		<link rel="prefetch" href={__config.dev_dot.datadog_config.scriptUrl} />
+	)
 }
 
 function DatadogScriptTag() {
-  return (
-    <Script
-      id="datadog-script"
-      strategy="afterInteractive"
-      dangerouslySetInnerHTML={{
-        __html: datadogScriptBody,
-      }}
-    />
-  )
+	return (
+		<Script
+			id="datadog-script"
+			strategy="afterInteractive"
+			dangerouslySetInnerHTML={{
+				__html: datadogScriptBody,
+			}}
+		/>
+	)
 }
 
 export { DatadogHeadTag, DatadogScriptTag, datadogScriptBody }

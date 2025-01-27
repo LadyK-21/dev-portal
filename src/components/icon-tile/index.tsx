@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import classNames from 'classnames'
 import { IconTileProps } from './types'
 import s from './icon-tile.module.css'
@@ -13,23 +18,23 @@ import s from './icon-tile.module.css'
  * ref: https://www.figma.com/file/noyY6dUMDYjmySpHcMjhkN/HDS-Product---Components-%5BWIP%5D?node-id=1377%3A11992
  */
 function IconTile({
-  children,
-  size = 'medium',
-  brandColor = 'neutral',
-  className,
+	children,
+	size = 'medium',
+	brandColor = 'neutral',
+	className,
 }: IconTileProps): React.ReactElement {
-  return (
-    <span
-      className={classNames(
-        s.root,
-        s[`size-${size}`],
-        s[`color-${brandColor}`],
-        className
-      )}
-    >
-      {children}
-    </span>
-  )
+	return (
+		<span
+			className={classNames(
+				s.root,
+				s[`size-${size}`],
+				s[`color-${brandColor}`],
+				className
+			)}
+		>
+			{children}
+		</span>
+	)
 }
 
 export default IconTile

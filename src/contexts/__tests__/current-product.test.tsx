@@ -1,93 +1,118 @@
-import { ReactNode } from 'react'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { ReactNode, Component } from 'react'
 import { render, screen } from '@testing-library/react'
-import { renderHook } from '@testing-library/react-hooks'
+import { renderHook } from '@testing-library/react'
 import { Product } from 'types/products'
 import {
-  CurrentProductProvider,
-  useCurrentProduct,
+	CurrentProductProvider,
+	useCurrentProduct,
 } from 'contexts/current-product'
+import type { MockInstance } from 'vitest'
 
 /**
  * Handles rendering both `CurrentProductProvider` and `useCurrentProduct` using
- * the `renderHook` utility from `@testing-library/react-hooks`. Returns the
+ * the `renderHook` utility from `@testing-library/react`. Returns the
  * result of `renderHook`.
  */
 const setup = (currentProduct: Product) => {
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <CurrentProductProvider
-      currentProduct={{
-        ...currentProduct,
-        basePaths: [],
-        navigationHeaderItems: {},
-        sidebar: {
-          landingPageNavData: [],
-        },
-        algoliaConfig: {
-          indexName: '',
-        },
-      }}
-    >
-      {children}
-    </CurrentProductProvider>
-  )
-  return renderHook(() => useCurrentProduct(), { wrapper })
+	const wrapper = ({ children }: { children: ReactNode }) => (
+		<CurrentProductProvider
+			currentProduct={{
+				...currentProduct,
+				algoliaConfig: {
+					indexName: '',
+				},
+				basePaths: [],
+				rootDocsPaths: [],
+				integrationsConfig: {},
+			}}
+		>
+			{children}
+		</CurrentProductProvider>
+	)
+	return renderHook(() => useCurrentProduct(), { wrapper })
 }
 
 describe('CurrentProductContext', () => {
-  let useRouter: jest.SpyInstance
-  beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    useRouter = jest.spyOn(require('next/router'), 'useRouter')
-    useRouter.mockReturnValue({
-      events: {
-        off: jest.fn(),
-        on: jest.fn(),
-      },
-    })
-  })
+	let useRouter: MockInstance
+	beforeAll(() => {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		useRouter = vi.spyOn(require('next/router'), 'useRouter')
+		useRouter.mockReturnValue({
+			events: {
+				off: vi.fn(),
+				on: vi.fn(),
+			},
+		})
+	})
 
-  afterAll(() => {
-    useRouter.mockRestore()
-  })
+	afterAll(() => {
+		useRouter.mockRestore()
+	})
 
-  test('useCurrentProduct throws an error if not used within CurrentProductProvider', () => {
-    const { result } = renderHook(() => useCurrentProduct())
+	test('useCurrentProduct throws an error if not used within CurrentProductProvider', () => {
+		const spy = vi.spyOn(console, 'error').mockImplementation(() => void 0)
 
-    expect(result.error.message).toBe(
-      'useCurrentProduct must be used within a CurrentProductProvider'
-    )
-  })
+		let error
+		renderHook(() => useCurrentProduct(), {
+			wrapper: class Wrapper extends Component<{ children: ReactNode }> {
+				state = { error: false }
 
-  test('CurrentProductProvider renders its children without changes', () => {
-    const testText = 'super special unique text for testing'
-    render(
-      <CurrentProductProvider currentProduct={undefined}>
-        {testText}
-      </CurrentProductProvider>
-    )
+				static getDerivedStateFromError() {
+					return { error: true }
+				}
+				override componentDidCatch(err) {
+					error = err
+				}
+				override render() {
+					if (this.state.error) {
+						return null
+					}
+					return this.props.children
+				}
+			},
+		})
+		expect(error.message).toEqual(
+			'useCurrentProduct must be used within a CurrentProductProvider'
+		)
 
-    expect(screen.getByText(testText)).toBeDefined()
-  })
+		spy.mockRestore()
+	})
 
-  describe('useCurrentProduct returns the value provided to CurrentProductProvider', () => {
-    test('when the path is "/", null is returned', () => {
-      useRouter.mockReturnValueOnce({
-        asPath: '/',
-        events: {
-          off: jest.fn(),
-          on: jest.fn(),
-        },
-      })
-      const { result } = setup({ slug: 'waypoint', name: 'Waypoint' })
+	test('CurrentProductProvider renders its children without changes', () => {
+		const testText = 'super special unique text for testing'
+		render(
+			<CurrentProductProvider currentProduct={undefined}>
+				{testText}
+			</CurrentProductProvider>
+		)
 
-      expect(result.current).toBeNull()
-    })
+		expect(screen.getByText(testText)).toBeDefined()
+	})
 
-    test('when the path is not "/", the correct value is returned', () => {
-      const { result } = setup({ slug: 'waypoint', name: 'Waypoint' })
+	describe('useCurrentProduct returns the value provided to CurrentProductProvider', () => {
+		test('when the path is "/", null is returned', () => {
+			useRouter.mockReturnValueOnce({
+				asPath: '/',
+				events: {
+					off: vi.fn(),
+					on: vi.fn(),
+				},
+			})
+			const { result } = setup({ slug: 'waypoint', name: 'Waypoint' })
 
-      expect(result.current.slug).toEqual('waypoint')
-      expect(result.current.name).toEqual('Waypoint')
-    })
-  })
+			expect(result.current).toBeNull()
+		})
+
+		test('when the path is not "/", the correct value is returned', () => {
+			const { result } = setup({ slug: 'waypoint', name: 'Waypoint' })
+
+			expect(result.current.slug).toEqual('waypoint')
+			expect(result.current.name).toEqual('Waypoint')
+		})
+	})
 })

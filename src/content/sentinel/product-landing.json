@@ -1,0 +1,81 @@
+{
+	"hero": {
+		"heading": "Enforce policy as code for HashiCorp products",
+		"image": "https://www.datocms-assets.com/2885/1702568388-sentinel-illi.png"
+	},
+	"overview": {
+		"heading": "What is Sentinel?",
+		"body": "Sentinel is a policy as code tool that lets you control what users of HashiCorp products are allowed to do. It enforces policies proactively, preventing end users from deploying changes that are not allowed.",
+		"cta": {
+			"text": "Learn more",
+			"url": "/sentinel/docs/what"
+		},
+		"image": {
+			"light": "https://www.datocms-assets.com/2885/1707422837-devdot-sentinel_lm.png",
+			"dark": "https://www.datocms-assets.com/2885/1707422896-devdot-sentinel_dm.png"
+		}
+	},
+	"get_started": {
+		"heading": "Getting Started",
+		"body": "Install the Sentinel CLI. Then write and run your first example Sentinel policies.",
+		"ctas": [
+			{
+				"text": "Quick Start",
+				"url": "/sentinel/tutorials/get-started"
+			},
+			{
+				"text": "Language Documentation",
+				"url": "/sentinel/docs/language"
+			}
+		]
+	},
+	"blocks": [
+		{
+			"type": "heading",
+			"heading": "Use Cases",
+			"level": 2,
+			"size": 400
+		},
+		{
+			"type": "linked_cards",
+			"cards": [
+				{
+					"heading": "Infrastructure",
+					"body": "Use HCP Terraform with Sentinel to check that infrastructure will comply with policies.",
+					"url": "/terraform/tutorials/policy/sentinel-install"
+				},
+				{
+					"heading": "Security",
+					"body": "Use Vault with Sentinel to control who can access secrets based on their role or the endpoint.",
+					"url": "/vault/tutorials/policies/sentinel"
+				},
+				{
+					"heading": "Applications",
+					"body": "Use Nomad with Sentinel to control jobs based on driver or other attributes of the job object.",
+					"url": "/nomad/tutorials/governance-and-policy/sentinel"
+				}
+			]
+		},
+		{
+			"type": "heading",
+			"heading": "Playground",
+			"level": 2,
+			"size": 400
+		},
+		{
+			"type": "linked_cards",
+			"cards": [
+				{
+					"heading": "Guided quick start",
+					"body": "Read through guided language examples with an embedded, runnable policy snippets.",
+					"url": "/sentinel/docs/writing/basic"
+				},
+				{
+					"heading": "Sentinel playground",
+					"body": "Write and test policies in a free, hosted sandbox. Upload mock data to write policies against, or customize the provided example, which checks that an S3 bucket has a private ACL.",
+					"url": "https://play.sentinelproject.io"
+				}
+			]
+		}
+	]
+}

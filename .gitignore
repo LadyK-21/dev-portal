@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 .next
 out
+.tmp
 .env*.local
 .vercel
 _temp-migrations/
@@ -10,3 +11,12 @@ src/data/_rewrites.generated.json
 test-results/
 playwright-report/
 tsconfig.tsbuildinfo
+src/.generated/
+scripts/docs-content-link-rewrites/.generated
+src/.extracted/
+public/.extracted/
+
+# sitemap
+sitemap-0.xml
+sitemap.xml
+robots.txt

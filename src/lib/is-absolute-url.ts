@@ -1,4 +1,9 @@
 /**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+/**
  * Given a string,
  * return true if the string is an absolute URL,
  * or false otherwise.
@@ -10,8 +15,8 @@
  * @returns
  */
 function isAbsoluteUrl(string: string): boolean {
-  const regex = /^[a-zA-Z][a-zA-Z\d+\-.]*:/
-  return regex.test(string)
+	const regex = /^[a-zA-Z][a-zA-Z\d+\-.]*:/
+	return regex.test(string)
 }
 
 export default isAbsoluteUrl

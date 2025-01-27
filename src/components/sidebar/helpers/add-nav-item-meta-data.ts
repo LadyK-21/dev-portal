@@ -1,15 +1,53 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import {
-  EnrichedLinkNavItem,
-  EnrichedNavItem,
-  EnrichedSubmenuNavItem,
-  LinkNavItemWithMetaData,
-  NavItemWithMetaData,
-  SubmenuNavItemWithMetaData,
+	EnrichedLinkNavItem,
+	EnrichedNavItem,
+	EnrichedSubmenuNavItem,
+	LinkNavItemWithMetaData,
+	NavItemWithMetaData,
+	SubmenuNavItemWithMetaData,
 } from 'components/sidebar/types'
 
 interface AddNavItemMetaDataResult {
-  foundActiveItem: boolean
-  itemsWithMetadata: NavItemWithMetaData[]
+	foundActiveItem: boolean
+	itemsWithMetadata: NavItemWithMetaData[]
+}
+
+/**
+ * Returns an object for rendering a Badge in a sidebar item if a <sup> tag is
+ * found in its title.
+ *
+ * Examples:
+ *
+ * getBadgeFromTitle("Audit Log Streaming <sup>BETA</sup>") returns:
+ *   {
+ *     text: "BETA",
+ *     color: "neutral",
+ *     type: "outlined",
+ *   }
+ *
+ * getBadgeFromTitle("Audit Log Streaming") returns:
+ *   null
+ */
+const getBadgeFromTitle = (title: string) => {
+	let badge = null
+
+	const regex = new RegExp(/<sup>(.*)<\/sup>$/)
+	const matches = title.match(regex)
+	if (matches && matches.length > 0) {
+		const badgeText = matches[1]
+		badge = {
+			text: badgeText,
+			color: 'neutral',
+			type: 'outlined',
+		}
+	}
+
+	return badge
 }
 
 /**
@@ -25,51 +63,77 @@ interface AddNavItemMetaDataResult {
  * subsequent items will not be checked for whether or not they're active.
  */
 export const addNavItemMetaData = (
-  currentPath: string,
-  items: EnrichedNavItem[]
+	currentPath: string,
+	items: EnrichedNavItem[]
 ): AddNavItemMetaDataResult => {
-  // `menuItems` is an optional prop, so nothing to do if `items` is undefined
-  let foundActiveItem = false
-  if (!items) {
-    return { foundActiveItem, itemsWithMetadata: [] }
-  }
+	// `menuItems` is an optional prop, so nothing to do if `items` is undefined
+	let foundActiveItem = false
+	if (!items) {
+		return { foundActiveItem, itemsWithMetadata: [] }
+	}
 
-  const itemsWithMetadata = items.map(
-    (item: EnrichedNavItem): NavItemWithMetaData => {
-      // Found an `EnrichedSubmenuNavItem` object
-      if (item.hasOwnProperty('routes')) {
-        const result = addNavItemMetaData(
-          currentPath,
-          (item as EnrichedSubmenuNavItem).routes
-        )
-        const hasActiveChild = !foundActiveItem && result.foundActiveItem
+	const itemsWithMetadata = items.map(
+		(item: EnrichedNavItem): NavItemWithMetaData => {
+			let itemCopy = { ...item }
 
-        foundActiveItem = hasActiveChild || foundActiveItem
+			/**
+			 * If a `badge` object can be determined from a `title` with `<sup>`,
+			 * create the `badge` object and remove the `<sup>` tags from the title.
+			 *
+			 * This should be in place until all nav data content (including past
+			 * versions) no longer contains `<sup>` tags in `title`s.
+			 */
+			if (item.hasOwnProperty('title')) {
+				const itemWithTitle = item as
+					| EnrichedSubmenuNavItem
+					| EnrichedLinkNavItem
+				const badge =
+					itemWithTitle.badge ?? getBadgeFromTitle(itemWithTitle.title)
+				const title = badge
+					? itemWithTitle.title.replace(`<sup>${badge.text}</sup>`, '').trim()
+					: itemWithTitle.title
 
-        return {
-          ...item,
-          routes: result.itemsWithMetadata,
-          hasActiveChild,
-        } as SubmenuNavItemWithMetaData
-      }
+				itemCopy = {
+					...itemCopy,
+					badge: badge,
+					title: title,
+				}
+			}
 
-      // Found an `EnrichedLinkNavItem` object
-      if (item.hasOwnProperty('path')) {
-        const itemPath = (item as EnrichedLinkNavItem).fullPath
-        const isActive = !foundActiveItem && itemPath === currentPath
+			// Found an `EnrichedSubmenuNavItem` object
+			if (item.hasOwnProperty('routes')) {
+				const result = addNavItemMetaData(
+					currentPath,
+					(item as EnrichedSubmenuNavItem).routes
+				)
+				const hasActiveChild = !foundActiveItem && result.foundActiveItem
 
-        foundActiveItem = isActive || foundActiveItem
+				foundActiveItem = hasActiveChild || foundActiveItem
 
-        return {
-          ...item,
-          isActive,
-        } as LinkNavItemWithMetaData
-      }
+				return {
+					...itemCopy,
+					routes: result.itemsWithMetadata,
+					hasActiveChild,
+				} as SubmenuNavItemWithMetaData
+			}
 
-      // Found `DividerNavItem` or `HeadingNavItem` object, do not modify
-      return { ...item } as NavItemWithMetaData
-    }
-  )
+			// Found an `EnrichedLinkNavItem` object
+			if (item.hasOwnProperty('fullPath')) {
+				const itemPath = (item as EnrichedLinkNavItem).fullPath
+				const isActive =
+					!foundActiveItem && itemPath.replace(/\/$/, '') === currentPath
 
-  return { foundActiveItem, itemsWithMetadata }
+				foundActiveItem = isActive || foundActiveItem
+
+				return {
+					...itemCopy,
+					isActive,
+				} as LinkNavItemWithMetaData
+			}
+
+			return itemCopy as NavItemWithMetaData
+		}
+	)
+
+	return { foundActiveItem, itemsWithMetadata }
 }

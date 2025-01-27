@@ -1,30 +1,38 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import {
-  KeyboardEventHandler,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
+	KeyboardEventHandler,
+	ReactElement,
+	useEffect,
+	useRef,
+	useState,
 } from 'react'
-import Link from 'next/link'
 import { IconHome16 } from '@hashicorp/flight-icons/svg-react/home-16'
-import { IconChevronRight16 } from '@hashicorp/flight-icons/svg-react/chevron-right-16'
+import { IconChevronDown16 } from '@hashicorp/flight-icons/svg-react/chevron-down-16'
 import { IconExternalLink16 } from '@hashicorp/flight-icons/svg-react/external-link-16'
+import { IconGuide16 } from '@hashicorp/flight-icons/svg-react/guide-16'
 import { ProductSlug } from 'types/products'
 import isAbsoluteUrl from 'lib/is-absolute-url'
 import Badge from 'components/badge'
+import Link from 'components/link'
 import { MenuItem } from 'components/sidebar'
 import ProductIcon from 'components/product-icon'
 import {
-  SidebarHorizontalRule,
-  SidebarSectionHeading,
+	SidebarHorizontalRule,
+	SidebarNavHighlightItem,
+	SidebarSectionHeading,
 } from 'components/sidebar/components'
 import Text from 'components/text'
 import {
-  RightIconsContainerProps,
-  SidebarNavLinkItemProps,
-  SidebarNavMenuItemBadgeProps,
-  SidebarNavMenuItemProps,
-  SupportedIconName,
+	RightIconsContainerProps,
+	SidebarNavLinkItemProps,
+	SidebarNavMenuButtonProps,
+	SidebarNavMenuItemBadgeProps,
+	SidebarNavMenuItemProps,
+	SupportedIconName,
 } from './types'
 import s from './sidebar-nav-menu-item.module.css'
 
@@ -32,9 +40,10 @@ import s from './sidebar-nav-menu-item.module.css'
  * Used for leading icon in `SidebarNavLinkItem`.
  */
 const SUPPORTED_LEADING_ICONS: {
-  [key in SupportedIconName]: ReactElement
+	[key in SupportedIconName]: ReactElement
 } = {
-  home: <IconHome16 name="home" />,
+	home: <IconHome16 name="home" />,
+	guide: <IconGuide16 />,
 }
 
 /**
@@ -43,33 +52,33 @@ const SUPPORTED_LEADING_ICONS: {
  * Returns `null` if neither are provided.
  */
 const RightIconsContainer = ({ badge, icon }: RightIconsContainerProps) => {
-  if (!badge && !icon) {
-    return null
-  }
+	if (!badge && !icon) {
+		return null
+	}
 
-  return (
-    <div className={s.rightIconsContainer}>
-      {badge}
-      {icon}
-    </div>
-  )
+	return (
+		<div className={s.rightIconsContainer}>
+			{badge}
+			{icon}
+		</div>
+	)
 }
 
 /**
  * A wrapper around Badge for rendering consistent Badges in SidebarNavMenuItem.
  */
 const SidebarNavMenuItemBadge = ({
-  color,
-  text,
-  type,
+	color,
+	text,
+	type,
 }: SidebarNavMenuItemBadgeProps) => {
-  if (color !== 'highlight' && color !== 'neutral') {
-    throw new Error(
-      `[SidebarNavMenuItemBadge] Only the "highlight" and "neutral" colors are supported for Badges, but was given ${color}.`
-    )
-  }
+	if (color !== 'highlight' && color !== 'neutral') {
+		throw new Error(
+			`[SidebarNavMenuItemBadge] Only the "highlight" and "neutral" colors are supported for Badges, but was given ${color}.`
+		)
+	}
 
-  return <Badge color={color} size="small" text={text} type={type} />
+	return <Badge color={color} size="small" text={text} type={type} />
 }
 
 /**
@@ -78,76 +87,114 @@ const SidebarNavMenuItemBadge = ({
  * external link icon if the link is external.
  */
 const SidebarNavLinkItem = ({ item }: SidebarNavLinkItemProps) => {
-  const href = item.fullPath || item.href
-  const isExternal = isAbsoluteUrl(href)
-  const hasBadge = !!(item as $TSFixMe).badge
+	const href = item.fullPath || item.href
+	const isExternal = isAbsoluteUrl(href)
+	const hasBadge = !!(item as $TSFixMe).badge
 
-  let leadingIcon
-  if (item.leadingIconName) {
-    const icon = SUPPORTED_LEADING_ICONS[item.leadingIconName] || (
-      <ProductIcon productSlug={item.leadingIconName as ProductSlug} />
-    )
-    leadingIcon = <div className={s.leadingIcon}>{icon}</div>
-  }
+	// Determine the leading icon to use, if any
+	let leadingIcon
+	if (item.leadingIconName) {
+		const icon = SUPPORTED_LEADING_ICONS[item.leadingIconName] || (
+			<ProductIcon productSlug={item.leadingIconName as ProductSlug} />
+		)
+		leadingIcon = <div className={s.leadingIcon}>{icon}</div>
+	}
 
-  // Conditionally determining props for the <a>
-  const ariaCurrent = !isExternal && item.isActive ? 'page' : undefined
-  const ariaLabel = isExternal
-    ? `${item.title}. Opens in a new tab.`
-    : undefined
-  const className = s.sidebarNavMenuItem
-  const rel = isExternal ? 'noreferrer noopener' : undefined
-  const target = isExternal ? '_blank' : undefined
+	// Determine the trailing icon to use, if any
+	const trailingIcon = isExternal ? <IconExternalLink16 /> : item.trailingIcon
+	const ariaCurrent = !isExternal && item.isActive ? 'page' : undefined
+	const [isMounted, setIsMounted] = useState(false)
 
-  const anchorContent = (
-    <>
-      {leadingIcon}
-      <Text
-        asElement="span"
-        className={s.navMenuItemLabel}
-        dangerouslySetInnerHTML={{ __html: item.title }}
-        size={200}
-        weight="regular"
-      />
-      <RightIconsContainer
-        badge={
-          hasBadge ? (
-            <SidebarNavMenuItemBadge {...(item as $TSFixMe).badge} />
-          ) : undefined
-        }
-        icon={isExternal ? <IconExternalLink16 /> : undefined}
-      />
-    </>
-  )
+	/**
+	 * Note on this useEffect:
+	 *
+	 * Due to how we are rewriting routes for tutorial variants, the URLs rendered in
+	 * this component are incorrect during SSR, and for some reason are NOT
+	 * getting reconciled on the client even though all of the props and state
+	 * values internal to Link are correct. So the ariaCurrent value wasn't being
+	 * set properly and the active item wouldn't render. We think its due to a hydration
+	 * mismatch error. This set state ensures that after the component mounts, it gets resolved
+	 * by forcing a rerender.
+	 */
+	useEffect(() => {
+		setIsMounted(true)
+	}, [])
 
-  if (href) {
-    // link is not "disabled"
-    return (
-      <Link href={href}>
-        <a
-          aria-current={ariaCurrent}
-          aria-label={ariaLabel}
-          className={className}
-          rel={rel}
-          target={target}
-        >
-          {anchorContent}
-        </a>
-      </Link>
-    )
-  } else {
-    // link is "disabled"
-    return (
-      <a
-        aria-disabled
-        aria-label={(item as $TSFixMe).ariaLabel}
-        className={className}
-        tabIndex={0}
-      >
-        {anchorContent}
-      </a>
-    )
-  }
+	const ariaLabel = isExternal
+		? `${item.title}. Opens in a new tab.`
+		: undefined
+	const className = s.sidebarNavMenuItem
+	const rel = isExternal ? 'noreferrer noopener' : undefined
+
+	const anchorContent = (
+		<>
+			{leadingIcon}
+			<Text
+				asElement="span"
+				className={s.navMenuItemLabel}
+				dangerouslySetInnerHTML={{ __html: item.title }}
+				size={200}
+				weight="regular"
+			/>
+			<RightIconsContainer
+				badge={
+					hasBadge ? (
+						<SidebarNavMenuItemBadge {...(item as $TSFixMe).badge} />
+					) : undefined
+				}
+				icon={trailingIcon}
+			/>
+		</>
+	)
+
+	if (href) {
+		// link is not "disabled"
+		return (
+			<Link
+				key={String(isMounted)}
+				aria-current={ariaCurrent}
+				aria-label={ariaLabel}
+				className={className}
+				href={href}
+				opensInNewTab={isExternal}
+				rel={rel}
+			>
+				{anchorContent}
+			</Link>
+		)
+	} else {
+		// link is "disabled"
+		return (
+			<a
+				aria-disabled
+				aria-label={(item as $TSFixMe).ariaLabel}
+				className={className}
+				tabIndex={0}
+			>
+				{anchorContent}
+			</a>
+		)
+	}
+}
+
+/**
+ * Handles rendering a button and icon for the sidebar.
+ * Currently used for a 'sign out' action on the profile page
+ */
+export function SidebarNavMenuButton({ item }: SidebarNavMenuButtonProps) {
+	return (
+		<button className={s.sidebarNavMenuItem} onClick={item.onClick}>
+			<Text
+				size={200}
+				weight="regular"
+				asElement="span"
+				className={s.navMenuItemLabel}
+			>
+				{item.title}
+			</Text>
+			<RightIconsContainer icon={item.icon} />
+		</button>
+	)
 }
 
 /**
@@ -155,71 +202,81 @@ const SidebarNavLinkItem = ({ item }: SidebarNavLinkItemProps) => {
  * items in the Sidebar.
  */
 const SidebarNavSubmenuItem = ({ item }: SidebarNavMenuItemProps) => {
-  const buttonRef = useRef<HTMLButtonElement>()
-  const [isOpen, setIsOpen] = useState(
-    item.hasActiveChild || item.hasChildrenMatchingFilter || item.matchesFilter
-  )
-  const hasBadge = !!(item as $TSFixMe).badge
+	const buttonRef = useRef<HTMLButtonElement>()
+	const [isOpen, setIsOpen] = useState(
+		item.isOpen ||
+			item.hasActiveChild ||
+			item.hasChildrenMatchingFilter ||
+			item.matchesFilter
+	)
+	const hasBadge = !!(item as $TSFixMe).badge
 
-  /**
-   * Without this effect, the menu items aren't re-rerendered to be open. Seems
-   * to be because the item prop sent to the component don't change. Might work
-   * if we pass the props needed instead of just the item object?
-   */
-  useEffect(() => {
-    setIsOpen(
-      item.hasActiveChild ||
-        item.hasChildrenMatchingFilter ||
-        item.matchesFilter
-    )
-  }, [item.hasActiveChild, item.hasChildrenMatchingFilter, item.matchesFilter])
+	/**
+	 * Without this effect, the menu items aren't re-rerendered to be open. Seems
+	 * to be because the item prop sent to the component don't change. Might work
+	 * if we pass the props needed instead of just the item object?
+	 */
+	useEffect(() => {
+		setIsOpen(
+			item.isOpen ||
+				item.hasActiveChild ||
+				item.hasChildrenMatchingFilter ||
+				item.matchesFilter
+		)
+	}, [
+		item.isOpen,
+		item.hasActiveChild,
+		item.hasChildrenMatchingFilter,
+		item.matchesFilter,
+	])
 
-  const handleKeyDown: KeyboardEventHandler<HTMLUListElement> = (e) => {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsOpen(false)
-      buttonRef.current.focus()
-    }
-  }
+	const handleKeyDown: KeyboardEventHandler<HTMLUListElement> = (e) => {
+		if (e.key === 'Escape') {
+			e.preventDefault()
+			e.stopPropagation()
+			setIsOpen(false)
+			buttonRef.current.focus()
+		}
+	}
 
-  const buttonId = `${item.id}-button`
-  const listId = `${item.id}-list`
-  return (
-    <>
-      <button
-        aria-controls={listId}
-        aria-expanded={isOpen}
-        className={s.sidebarNavMenuItem}
-        id={buttonId}
-        onClick={() => setIsOpen((prevState: boolean) => !prevState)}
-        ref={buttonRef}
-      >
-        <Text
-          asElement="span"
-          className={s.navMenuItemLabel}
-          dangerouslySetInnerHTML={{ __html: item.title }}
-          size={200}
-          weight="regular"
-        />
-        <RightIconsContainer
-          badge={
-            hasBadge ? (
-              <SidebarNavMenuItemBadge {...(item as $TSFixMe).badge} />
-            ) : undefined
-          }
-          icon={<IconChevronRight16 />}
-        />
-      </button>
-      {isOpen && (
-        <ul id={listId} onKeyDown={handleKeyDown}>
-          {item.routes.map((route: MenuItem) => (
-            <SidebarNavMenuItem key={route.id} item={route} />
-          ))}
-        </ul>
-      )}
-    </>
-  )
+	const buttonId = `${item.id}-button`
+	const listId = `${item.id}-list`
+	return (
+		<>
+			<button
+				aria-controls={isOpen ? listId : null}
+				aria-expanded={isOpen}
+				className={s.sidebarNavMenuItem}
+				id={buttonId}
+				onClick={() => setIsOpen((prevState: boolean) => !prevState)}
+				ref={buttonRef}
+			>
+				<Text
+					asElement="span"
+					className={s.navMenuItemLabel}
+					dangerouslySetInnerHTML={{ __html: item.title }}
+					size={200}
+					weight="regular"
+				/>
+				<RightIconsContainer
+					badge={
+						hasBadge ? (
+							<SidebarNavMenuItemBadge {...(item as $TSFixMe).badge} />
+						) : undefined
+					}
+					icon={<IconChevronDown16 />}
+				/>
+			</button>
+			{isOpen && (
+				<ul id={listId} onKeyDown={handleKeyDown}>
+					{item.routes.map((route: MenuItem, i) => {
+						const key = `${route.id || route.fullPath || route.title}-${i}`
+						return <SidebarNavMenuItem key={key} item={route} />
+					})}
+				</ul>
+			)}
+		</>
+	)
 }
 
 /**
@@ -231,18 +288,27 @@ const SidebarNavSubmenuItem = ({ item }: SidebarNavMenuItemProps) => {
  *  - SidebarNavLink
  */
 const SidebarNavMenuItem = ({ item }: SidebarNavMenuItemProps) => {
-  let itemContent
-  if (item.divider) {
-    itemContent = <SidebarHorizontalRule />
-  } else if (item.heading) {
-    itemContent = <SidebarSectionHeading text={item.heading} />
-  } else if (item.routes) {
-    itemContent = <SidebarNavSubmenuItem item={item} />
-  } else {
-    itemContent = <SidebarNavLinkItem item={item} />
-  }
+	let itemContent
+	if (item.divider) {
+		itemContent = <SidebarHorizontalRule />
+	} else if (item.routes) {
+		itemContent = <SidebarNavSubmenuItem item={item} />
+	} else if (item.theme) {
+		itemContent = (
+			<SidebarNavHighlightItem
+				theme={item.theme}
+				text={item.title ?? item.heading}
+				href={item.fullPath}
+				isActive={item.isActive}
+			/>
+		)
+	} else if (item.heading) {
+		itemContent = <SidebarSectionHeading text={item.heading} />
+	} else {
+		itemContent = <SidebarNavLinkItem item={item} />
+	}
 
-  return <li id={item.id}>{itemContent}</li>
+	return <li id={item.id}>{itemContent}</li>
 }
 
 export { SidebarNavLinkItem, SidebarNavSubmenuItem }

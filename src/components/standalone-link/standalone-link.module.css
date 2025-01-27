@@ -1,47 +1,52 @@
-.root {
-  composes: g-focus-ring-from-box-shadow from global;
-  align-items: center;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  text-decoration: none;
-  width: fit-content;
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
 
-  &:active {
-    text-decoration: underline;
-  }
+.standaloneLink {
+	/* composition */
+	composes: g-focus-ring-from-box-shadow from global;
 
-  &:hover {
-    text-decoration: underline;
-  }
+	/* properties */
+	align-items: center;
+	border-radius: 5px;
+	cursor: pointer;
+	display: flex;
+	text-decoration: none;
+	width: fit-content;
 
-  /*
+	&:active,
+	&:hover {
+		text-decoration: underline;
+	}
+
+	/*
   Not styling ::before with position: absolute and -5px positions because that
   does not work on links that span more than one line.
   */
-  &:focus-visible {
-    text-decoration: none;
-    margin: -5px;
-    padding: 5px;
-  }
+	&:focus-visible {
+		text-decoration: none;
+		margin: -5px;
+		padding: 5px;
+	}
+}
 
-  & svg {
-    flex-shrink: 0;
+.standaloneLinkContents {
+	align-items: center;
+	display: flex;
+	gap: 6px;
+	width: fit-content;
 
-    &:first-child {
-      margin-right: 6px;
-    }
-
-    &:last-child {
-      margin-left: 6px;
-    }
-  }
+	& svg {
+		flex-shrink: 0;
+	}
 }
 
 .text {
-  font-size: var(--font-size);
-  font-weight: var(--token-typography-font-weight-medium);
-  line-height: var(--line-height);
+	font-family: var(--token-typography-font-stack-text);
+	font-size: var(--font-size);
+	font-weight: var(--token-typography-font-weight-medium);
+	line-height: var(--line-height);
 }
 
 /*
@@ -50,24 +55,24 @@
 ***
 */
 
-.color-primary {
-  color: var(--token-color-foreground-action);
+.primary {
+	color: var(--token-color-foreground-action);
 
-  &:active {
-    color: var(--token-color-foreground-action-active);
-  }
+	&.standaloneLink:active {
+		color: var(--token-color-foreground-action-active);
+	}
 
-  &:hover {
-    color: var(--token-color-foreground-action-hover);
-  }
+	&.standaloneLink:hover {
+		color: var(--token-color-foreground-action-hover);
+	}
 }
 
-.color-secondary {
-  color: var(--token-color-foreground-strong);
+.secondary {
+	color: var(--token-color-foreground-strong);
 
-  &:active {
-    color: var(--token-color-foreground-primary);
-  }
+	&.standaloneLink:active {
+		color: var(--token-color-foreground-primary);
+	}
 }
 
 /*
@@ -77,16 +82,16 @@
 */
 
 .small {
-  --font-size: var(--token-typography-body-100-font-size);
-  --line-height: 1rem;
+	--font-size: var(--token-typography-body-100-font-size);
+	--line-height: 1rem;
 }
 
 .medium {
-  --font-size: var(--token-typography-body-200-font-size);
-  --line-height: 1rem;
+	--font-size: var(--token-typography-body-200-font-size);
+	--line-height: 1rem;
 }
 
 .large {
-  --font-size: var(--token-typography-body-300-font-size);
-  --line-height: 1.5rem;
+	--font-size: var(--token-typography-body-300-font-size);
+	--line-height: 1.5rem;
 }

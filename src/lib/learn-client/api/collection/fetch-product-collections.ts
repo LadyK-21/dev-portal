@@ -1,14 +1,20 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import {
-  Collection,
-  uuid,
-  ProductOption,
-  AllCollectionsProductOptions,
+	Collection,
+	uuid,
+	ProductOption,
+	AllCollectionsProductOptions,
+	ThemeOption,
 } from 'lib/learn-client/types'
 import { get, toError } from '../../index'
 
 // /products/:identifier/collections
 export const PRODUCT_COLLECTION_API_ROUTE = (
-  identifier: ProductOption | uuid
+	identifier: ProductOption | uuid
 ) => `/products/${identifier}/collections`
 
 /**
@@ -22,27 +28,38 @@ export const PRODUCT_COLLECTION_API_ROUTE = (
  * includes filtering for theme
  */
 export async function fetchAllCollectionsByProduct(
-  product: AllCollectionsProductOptions
+	product: AllCollectionsProductOptions,
+	/**
+	 * All `ProductOption` values except `sentinel` can be used as "theme" options.
+	 * Theme is mainly used to add a product logo to various UI elements, and
+	 * since Sentinel doesn't have a logo, it's not a valid theme option.
+	 *
+	 * Note: an alternative here might be to implement a `theme` option for
+	 * Sentinel, and for now, set it to render a HashiCorp logo. This might
+	 * be a more future-proof approach. This would require updates to `learn-api`:
+	 * https://github.com/hashicorp/learn-api/blob/main/src/models/collection.ts#L17
+	 */
+	theme?: Exclude<ProductOption, 'sentinel'> | ThemeOption
 ): Promise<Collection[]> {
-  const baseUrl = PRODUCT_COLLECTION_API_ROUTE(product.slug)
-  let route = baseUrl
+	const baseUrl = PRODUCT_COLLECTION_API_ROUTE(product.slug)
+	let route = baseUrl
 
-  if (product.sidebarSort) {
-    const params = new URLSearchParams([
-      ['topLevelCategorySort', 'true'],
-      ['theme', product.slug],
-    ])
+	if (product.sidebarSort) {
+		const params = []
+		params.push(['topLevelCategorySort', 'true'])
+		if (theme) {
+			params.push(['theme', theme])
+		}
+		route = baseUrl + `?${new URLSearchParams(params).toString()}`
+	}
 
-    route = baseUrl + `?${params.toString()}`
-  }
+	const getProductCollectionsRes = await get(route)
 
-  const getProductCollectionsRes = await get(route)
+	if (getProductCollectionsRes.ok) {
+		const res = await getProductCollectionsRes.json()
+		return res.result
+	}
 
-  if (getProductCollectionsRes.ok) {
-    const res = await getProductCollectionsRes.json()
-    return res.result
-  }
-
-  const error = toError(getProductCollectionsRes)
-  throw error
+	const error = toError(getProductCollectionsRes)
+	throw error
 }

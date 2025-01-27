@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { Toaster as ReactHotToaster } from 'react-hot-toast'
 
 /**
@@ -9,24 +14,26 @@ import { Toaster as ReactHotToaster } from 'react-hot-toast'
  * https://github.com/hashicorp/react-components/blob/main/packages/toast/toaster/index.tsx
  */
 export default function Toaster() {
-  return (
-    <ReactHotToaster
-      position="bottom-right"
-      gutter={16}
-      containerStyle={{
-        inset: 24,
-      }}
-      toastOptions={{
-        style: {
-          margin: 0,
-          padding: 0,
-          maxWidth: 404,
-          width: '100%',
-          backgroundColor: 'transparent',
-          boxShadow: 'none',
-          borderRadius: 0,
-        },
-      }}
-    />
-  )
+	return (
+		<ReactHotToaster
+			position="bottom-right"
+			gutter={16}
+			containerStyle={{
+				inset: 24,
+				// z-index is one less than the reach dialog overlay's
+				zIndex: 99,
+			}}
+			toastOptions={{
+				style: {
+					margin: 0,
+					padding: 0,
+					maxWidth: 404,
+					width: '100%',
+					backgroundColor: 'transparent',
+					boxShadow: 'none',
+					borderRadius: 0,
+				},
+			}}
+		/>
+	)
 }

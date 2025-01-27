@@ -1,101 +1,122 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import { Fragment } from 'react'
+import { useRouter } from 'next/router'
 
 import { CollectionCategorySidebarSection } from 'views/collection-view/helpers'
 import {
-  SidebarHorizontalRule,
-  SidebarSectionHeading,
-  SidebarNavMenuItem,
+	SidebarHorizontalRule,
+	SidebarSectionHeading,
+	SidebarNavMenuItem,
+	SidebarNavHighlightItem,
 } from 'components/sidebar/components'
 import Sidebar from 'components/sidebar'
+import TutorialViewSidebarContent from './components/tutorial-view-sidebar-content'
+import { ProductSlug } from 'types/products'
 import {
-  ListItemProps,
-  SectionListProps,
-  SectionTitleProps,
-  TutorialSidebarProps,
+	ListItemProps,
+	SectionListProps,
+	SectionTitleProps,
+	TutorialSidebarProps,
 } from './types'
 import s from './tutorials-sidebar.module.css'
 
 function TutorialsSidebar({
-  backToLinkProps,
-  children,
-  levelButtonProps,
-  overviewItemHref,
-  title,
-  visuallyHideTitle,
+	backToLinkProps,
+	children,
+	levelButtonProps,
+	overviewItemHref,
+	title,
+	visuallyHideTitle,
 }: TutorialSidebarProps) {
-  return (
-    <Sidebar
-      backToLinkProps={backToLinkProps}
-      levelButtonProps={levelButtonProps}
-      overviewItemHref={overviewItemHref}
-      showFilterInput={false}
-      title={title}
-      visuallyHideTitle={visuallyHideTitle}
-    >
-      {children}
-    </Sidebar>
-  )
+	return (
+		<Sidebar
+			backToLinkProps={backToLinkProps}
+			levelButtonProps={levelButtonProps}
+			overviewItemHref={overviewItemHref}
+			showFilterInput={false}
+			title={title}
+			visuallyHideTitle={visuallyHideTitle}
+		>
+			{children}
+		</Sidebar>
+	)
 }
 
 function CollectionViewSidebarContent({
-  sections,
+	sections,
+	productSlug,
 }: {
-  sections: CollectionCategorySidebarSection[]
+	sections: CollectionCategorySidebarSection[]
+	productSlug: ProductSlug
 }) {
-  return (
-    <>
-      {sections?.map(({ title, items }: CollectionCategorySidebarSection) => {
-        return (
-          <Fragment key={title}>
-            <HorizontalRule />
-            <SectionTitle text={title} />
-            <SectionList items={items} />
-          </Fragment>
-        )
-      })}
-    </>
-  )
+	return (
+		<>
+			<TutorialsOverviewItem productSlug={productSlug} />
+			{sections?.map(({ title, items }: CollectionCategorySidebarSection) => {
+				return (
+					<Fragment key={title}>
+						<HorizontalRule />
+						{title ? <SectionTitle text={title} /> : null}
+						<SectionList>
+							{items.map(({ text, href, isActive, badge }: ListItemProps) => {
+								return (
+									<ListItem
+										key={`${text}${href}`}
+										text={text}
+										href={href}
+										isActive={isActive}
+										badge={badge}
+									/>
+								)
+							})}
+						</SectionList>
+					</Fragment>
+				)
+			})}
+		</>
+	)
 }
 
-function TutorialViewSidebarContent({ items }: SectionListProps) {
-  return <SectionList items={items} />
+function TutorialsOverviewItem({ productSlug }: { productSlug: ProductSlug }) {
+	const router = useRouter()
+	const overviewItemHref = `/${productSlug}/tutorials`
+
+	return (
+		<SidebarNavHighlightItem
+			text="Tutorials"
+			href={overviewItemHref}
+			theme={productSlug}
+			isActive={router.asPath === overviewItemHref}
+		/>
+	)
 }
 
-function SectionList({ items }: SectionListProps) {
-  return (
-    <ul className={s.listRoot}>
-      {items.map(({ text, href, isActive }: ListItemProps) => {
-        return (
-          <ListItem
-            key={`${text}${href}`}
-            text={text}
-            href={href}
-            isActive={isActive}
-          />
-        )
-      })}
-    </ul>
-  )
+function SectionList({ children }: SectionListProps) {
+	return <ul className={s.listRoot}>{children}</ul>
 }
 
-function ListItem({ href, isActive, text }: ListItemProps) {
-  return <SidebarNavMenuItem item={{ isActive, title: text, href }} />
+function ListItem({ href, isActive, text, badge }: ListItemProps) {
+	return <SidebarNavMenuItem item={{ isActive, title: text, href, badge }} />
 }
 
 function SectionTitle({ text }: SectionTitleProps) {
-  return <SidebarSectionHeading text={text} />
+	return <SidebarSectionHeading text={text} />
 }
 
 function HorizontalRule() {
-  return <SidebarHorizontalRule />
+	return <SidebarHorizontalRule />
 }
 
 export {
-  CollectionViewSidebarContent,
-  HorizontalRule,
-  ListItem,
-  SectionList,
-  SectionTitle,
-  TutorialViewSidebarContent,
+	CollectionViewSidebarContent,
+	HorizontalRule,
+	ListItem,
+	SectionList,
+	SectionTitle,
+	TutorialViewSidebarContent,
 }
 export default TutorialsSidebar

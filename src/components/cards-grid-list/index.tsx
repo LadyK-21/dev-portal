@@ -1,5 +1,12 @@
-import { ReactNode, Children } from 'react'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+import { Children, CSSProperties } from 'react'
 import classNames from 'classnames'
+import { CardsGridListProps } from './types'
+import { TutorialCardsGridList, TutorialCardsGridListProps } from './components'
 import s from './cards-grid-list.module.css'
 
 /**
@@ -26,43 +33,49 @@ import s from './cards-grid-list.module.css'
  * fixed column mode slightly more brittle than min-width mode.
  */
 function CardsGridList({
-  children,
-  isOrdered = false,
-  fixedColumns,
-}: {
-  children: ReactNode
-  isOrdered?: boolean
-  fixedColumns?: number
-}) {
-  const ListRoot = isOrdered ? 'ol' : 'ul'
+	children,
+	isOrdered = false,
+	fixedColumns,
+	gridGap = '24px',
+}: CardsGridListProps) {
+	const ListRoot = isOrdered ? 'ol' : 'ul'
 
-  /**
-   * For minimum width mode, where layout is driven by
-   * minimum card widths, with column count automatically calculated.
-   */
-  const minWidthClasses = classNames(s.minWidthMode, {
-    [s.allowThreeColumns]: Children.count(children) % 3 == 0,
-  })
+	/**
+	 * For minimum width mode, where layout is driven by
+	 * minimum card widths, with column count automatically calculated.
+	 */
+	const minWidthClasses = classNames(s.minWidthMode, {
+		[s.allowThreeColumns]: Children.count(children) % 3 == 0,
+	})
 
-  /**
-   * For fixed columns mode, where layout is driven by
-   * media queries and explicit column counts.
-   */
-  const fixedModeClasses = classNames(
-    s.fixedColumnsMode,
-    s[`columns${fixedColumns}`]
-  )
+	/**
+	 * For fixed columns mode, where layout is driven by
+	 * media queries and explicit column counts.
+	 */
+	const fixedModeClasses = classNames(
+		s.fixedColumnsMode,
+		s[`columns${fixedColumns}`]
+	)
 
-  return (
-    <ListRoot
-      className={classNames(
-        s.listRoot,
-        fixedColumns ? fixedModeClasses : minWidthClasses
-      )}
-    >
-      {children}
-    </ListRoot>
-  )
+	return (
+		<ListRoot
+			className={classNames(
+				s.listRoot,
+				fixedColumns ? fixedModeClasses : minWidthClasses
+			)}
+			style={
+				{
+					'--grid-gap': gridGap,
+				} as CSSProperties
+			}
+		>
+			{Children.map(children, (child) => {
+				return <li>{child}</li>
+			})}
+		</ListRoot>
+	)
 }
 
+export type { CardsGridListProps, TutorialCardsGridListProps }
+export { TutorialCardsGridList }
 export default CardsGridList

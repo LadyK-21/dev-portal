@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 /*
 ***
 * Class for the main container.
@@ -10,95 +15,88 @@
 ***
 */
 .root {
-  --header-padding-left-right: 24px;
-  --header-dropdown-menu-padding-left-right: 12px;
+	--header-padding-left-right: 24px;
+	--header-menu-item-padding-left-right: 12px;
 
-  background-color: var(--token-color-palette-neutral-700);
-  display: flex;
-  justify-content: space-between;
-  padding-left: var(--header-padding-left-right);
-  padding-right: var(--header-padding-left-right);
-  position: relative;
-  width: 100%;
+	background-color: var(--token-color-surface-faint);
+	display: flex;
+	padding-top: 0;
+	padding-bottom: 0;
+	min-height: var(--navigation-header-height);
+	justify-content: space-between;
+	padding-left: var(--header-padding-left-right);
+	padding-right: var(--header-padding-left-right);
+	position: relative;
+	width: 100%;
 
-  @media (--dev-dot-tablet-down) {
-    padding-bottom: 14px;
-    padding-top: 14px;
-  }
+	@media (--dev-dot-show-mobile-menu) {
+		padding-bottom: 14px;
+		padding-top: 14px;
+	}
 }
 
 .leftSide {
-  align-items: center;
-  display: flex;
-  justify-content: left;
-}
-
-/*
-***
-* Note: these are all classes that get passed to `InlineSvg`. They need
-* `display: flex` set or there will be a small gap below the SVG, making them
-* off-center vertically.
-***
-*/
-.productLogo {
-  display: flex;
-
-  & svg {
-    height: 40px;
-    width: auto;
-  }
+	align-items: center;
+	display: flex;
+	justify-content: left;
+	gap: 24px;
 }
 
 .rightSide {
-  align-items: center;
-  display: flex;
-  justify-content: right;
-  gap: 16px;
-}
-
-/*
-***
-* Note: this fancy math is used for two reasons. First, to make sure the <nav>
-* items are always locatated in the same place in the header (when they're
-* visible). Second, which explains the precise values, to make sure the text of
-* the first <nav> item left-aligns with the text of the page content when there
-* is no extra space on the left or right side of it.
-***
-*/
-.contentBeforeNav {
-  align-items: center;
-  display: flex;
-  justify-content: left;
-
-  @media (--dev-dot-desktop) {
-    width: calc(
-      var(--dev-dot-sidebar-width) + var(--main-area-padding-left) -
-        var(--header-padding-left-right) -
-        var(--header-dropdown-menu-padding-left-right)
-    );
-  }
-}
-
-.navList {
-  align-items: center;
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+	align-items: center;
+	display: flex;
+	justify-content: right;
+	gap: 12px;
 }
 
 .mobileMenuButton {
-  composes: g-hide-on-desktop from global;
-  align-items: center;
-  background-color: transparent;
-  border-radius: 5px;
-  border: 1px solid transparent;
-  color: var(--token-color-foreground-high-contrast);
-  display: flex;
-  justify-content: center;
-  padding: 5px;
+	align-items: center;
+	background-color: transparent;
+	border-radius: 5px;
+	border: 1px solid transparent;
+	color: var(--token-color-foreground-strong);
+	display: flex;
+	justify-content: center;
+	padding: 5px;
 
-  &:hover {
-    border: 1px solid var(--token-color-palette-neutral-200);
-  }
+	&:hover {
+		border: 1px solid var(--token-color-border-strong);
+	}
+
+	@media (--dev-dot-hide-mobile-menu) {
+		display: none;
+	}
+}
+
+.authenticationControls {
+	/* properties */
+	align-items: center;
+	display: flex;
+	gap: 16px;
+
+	@media (--dev-dot-show-mobile-menu) {
+		display: none;
+	}
+}
+
+.signUpLink {
+	color: var(--token-color-foreground-high-contrast);
+
+	&:hover {
+		color: var(--token-color-foreground-high-contrast);
+	}
+}
+
+.userDropdownDisclosureActivator {
+	/* composition */
+	composes: g-focus-ring-from-box-shadow-dark from global;
+
+	/* properties */
+	background-color: transparent;
+	color: var(--token-color-foreground-strong);
+
+	&:hover,
+	&[aria-expanded='true'] {
+		border-color: var(--token-color-border-strong);
+	}
 }

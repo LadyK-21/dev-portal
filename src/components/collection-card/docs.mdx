@@ -8,8 +8,10 @@ Displays a linked card to a collection.
 
 With text heading:
 
-<LiveComponent>{`
+<LiveComponent>
+{`
 <CollectionCard
+	url="/"
     tutorialCount={16}
     heading='Write Terraform Configuration'
     description={
@@ -17,46 +19,48 @@ With text heading:
     }
     productsUsed={['terraform']}
 />
-`}</LiveComponent>
+`}
+</LiveComponent>
 
 With logos as heading:
 
 <div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 270px), 1fr))',
-    gap: '16px',
-  }}
+	style={{
+		display: 'grid',
+		gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 270px), 1fr))',
+		gap: '16px',
+	}}
 >
-  {Object.keys(CompanyLogoOption).map((logo, index) => {
-    return (
-      <CollectionCard
-        key={logo}
-        url="/"
-        tutorialCount={4 + index}
-        logo={logo}
-        heading="Title That Is Visually Hidden But Still Acts As The Card Title"
-        description={
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor vitae pharetra accumsan risu, dolor sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor vitae pharetra accumsan risu, dolor sit amet.'
-        }
-        productsUsed={[
-          'terraform',
-          'vault',
-          'consul',
-          'nomad',
-          'packer',
-          'vagrant',
-        ]}
-      />
-    )
-  })}
+	{Object.keys(CompanyLogoOption).map((logo, index) => {
+		return (
+			<CollectionCard
+				key={logo}
+				url="/"
+				tutorialCount={4 + index}
+				logo={logo}
+				heading="Title That Is Visually Hidden But Still Acts As The Card Title"
+				description={
+					'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor vitae pharetra accumsan risu, dolor sit amet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Auctor vitae pharetra accumsan risu, dolor sit amet.'
+				}
+				productsUsed={[
+					'terraform',
+					'vault',
+					'consul',
+					'nomad',
+					'packer',
+					'vagrant',
+				]}
+			/>
+		)
+	})}
 </div>
 
 ## Note on truncation
 
 `CollectionCard` uses CSS-based truncation to limit the number of `description` lines to `3`.
 
-<LiveComponent>{`
+<LiveComponent>
+{`
 <div style={{ maxWidth: '400px' }}>
   <CollectionCard
     url='/terraform/tutorials/oci-get-started'
@@ -68,4 +72,5 @@ With logos as heading:
     productsUsed={['terraform']}
 />
 </div>
-`}</LiveComponent>
+`}
+</LiveComponent>

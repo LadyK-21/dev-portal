@@ -1,30 +1,18 @@
-import { CardProps } from 'components/card/types'
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
 
-type NativeAnchorProps = JSX.IntrinsicElements['a']
+import { CardProps } from 'components/card'
+import { LinkProps } from 'components/link'
 
-export interface CardLinkProps {
-  /**
-   * An optional string value that labels the link. For use when content visible
-   * in the DOM meant to give the link meaning is either missing, or does not
-   * accurately describe the link.
-   */
-  ariaLabel?: NativeAnchorProps['aria-label']
+type InheritedCardProps = Pick<CardProps, 'children' | 'className'>
+type InheritedLinkProps = Pick<LinkProps, 'href' | 'onClick' | 'opensInNewTab'>
 
-  /**
-   * The content to render within the `CardLink` body. Passed to the inner
-   * `Card` component.
-   */
-  children: CardProps['children']
-
-  /**
-   * A string of one or more classnames passed to the inner `Card` component.
-   */
-  className?: NativeAnchorProps['className']
-
-  /**
-   * The destination of the link.
-   */
-  href: NativeAnchorProps['href']
-
-  target?: NativeAnchorProps['target']
+export interface CardLinkProps extends InheritedCardProps, InheritedLinkProps {
+	/**
+	 * The text used as the `CardLink`'s accessible label. Required so the element
+	 * is announced by screen readers.
+	 */
+	ariaLabel: LinkProps['aria-label']
 }

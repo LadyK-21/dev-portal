@@ -1,35 +1,65 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 // Third-party imports
+
 import { ReactElement, useMemo } from 'react'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
 
 // Global imports
 import { useCurrentProduct } from 'contexts'
 import SidebarSidecarLayout from 'layouts/sidebar-sidecar'
-import DevDotContent from 'components/dev-dot-content'
+import { TryHcpCalloutCompact } from 'components/try-hcp-callout/components/try-hcp-callout-compact'
 import {
-  generateInstallViewNavItems,
-  generateProductLandingSidebarNavData,
-  generateTopLevelSidebarNavData,
+	generateInstallViewNavItems,
+	generateProductLandingSidebarNavData,
+	generateTopLevelSidebarNavData,
 } from 'components/sidebar/helpers'
 
 // Local imports
 import {
-  ProductDownloadsViewContentProps,
-  ProductDownloadsViewProps,
+	ProductDownloadsViewContentProps,
+	ProductDownloadsViewProps,
 } from './types'
 import {
-  generateDefaultPackageManagers,
-  generatePackageManagers,
-  initializeBreadcrumbLinks,
-  initializeVersionSwitcherOptions,
+	initializeBreadcrumbLinks,
+	initializeVersionSwitcherOptions,
+	prettyOs,
+	sortPlatforms,
 } from './helpers'
 import { CurrentVersionProvider, useCurrentVersion } from './contexts'
 import {
-  DownloadsSection,
-  FeaturedTutorialsSection,
-  OfficialReleasesSection,
-  PageHeader,
-  SidecarMarketingCard,
+	DownloadsSection,
+	FeaturedLearnCardsSection,
+	PageHeader,
+	ReleaseInformationSection,
+	SidecarMarketingCard,
 } from './components'
+import s from './product-downloads-view.module.css'
+import { ContentWithPermalink } from 'views/open-api-docs-view/components/content-with-permalink'
+import Heading from 'components/heading'
+import viewStyles from 'views/product-downloads-view/product-downloads-view.module.css'
+import { MenuItem, SidebarProps } from 'components/sidebar/types'
+
+/**
+ * We need certain heading data, such as "Release information" & "Next Steps",
+ * to be consistent between the headings themselves and the sidebar links
+ * that point to them. This content could be lifted out to an authorable
+ * interface at some point, if there's demand, but for now, we hard-code it.
+ */
+const SHARED_HEADINGS = {
+	releaseInfo: {
+		id: 'release-information',
+		text: 'Release information',
+	},
+	featured: {
+		id: 'next-steps',
+		text: 'Next steps',
+	},
+}
 
 /**
  * This component is used to make it possible to consume the `useCurrentVersion`
@@ -37,99 +67,207 @@ import {
  * and passes this component as the child.
  */
 const ProductDownloadsViewContent = ({
-  pageContent,
-  releases,
-  versionSwitcherOptions,
+	isEnterpriseMode = false,
+	merchandisingSlot,
+	pageContent,
+	releases,
+	versionSwitcherOptions,
+	packageManagers,
 }: ProductDownloadsViewContentProps) => {
-  const {
-    doesNotHavePackageManagers,
-    featuredLearnCards,
-    packageManagerOverrides,
-    sidecarMarketingCard,
-    sidebarMenuItems,
-  } = pageContent
-  const currentProduct = useCurrentProduct()
-  const { currentVersion } = useCurrentVersion()
-  const breadcrumbLinks = useMemo(
-    () => initializeBreadcrumbLinks(currentProduct, currentVersion),
-    [currentProduct, currentVersion]
-  )
-  const sidebarNavDataLevels = [
-    generateTopLevelSidebarNavData(currentProduct.name),
-    generateProductLandingSidebarNavData(currentProduct),
-    generateInstallViewNavItems(currentProduct, sidebarMenuItems),
-  ]
-  const packageManagers = useMemo(() => {
-    if (doesNotHavePackageManagers) {
-      return []
-    }
+	const {
+		featuredCollectionCards,
+		featuredTutorialCards,
+		sidecarMarketingCard,
+		sidecarHcpCallout,
+		sidebarMenuItems = [],
+		installName,
+		additionalDownloadItems = [], // Used for the Boundary Desktop client
+	} = pageContent
+	const currentProduct = useCurrentProduct()
+	const { currentVersion } = useCurrentVersion()
+	const { pathname } = useRouter()
+	const breadcrumbLinks = useMemo(
+		() => initializeBreadcrumbLinks(currentProduct, isEnterpriseMode, pathname),
+		[currentProduct, isEnterpriseMode, pathname]
+	)
 
-    return generatePackageManagers({
-      defaultPackageManagers: generateDefaultPackageManagers(currentProduct),
-      packageManagerOverrides: packageManagerOverrides,
-    })
-  }, [currentProduct, doesNotHavePackageManagers, packageManagerOverrides])
+	// Group the selected release downloads by OS, for use in multiple places
+	const selectedRelease = releases.versions[currentVersion]
+	let downloadsByOS = useMemo(
+		() => sortPlatforms(selectedRelease),
+		[selectedRelease]
+	)
 
-  return (
-    <SidebarSidecarLayout
-      /**
-       * @TODO remove casting to `any`. Will require refactoring both
-       * `generateTopLevelSidebarNavData` and
-       * `generateInstallViewNavItems` to set up `menuItems` with the
-       * correct types. This will require chaning many files, so deferring for
-       * a follow-up PR since this is functional for the time being.
-       */
-      sidebarNavDataLevels={sidebarNavDataLevels as any}
-      breadcrumbLinks={breadcrumbLinks}
-      sidecarSlot={<SidecarMarketingCard {...sidecarMarketingCard} />}
-    >
-      {/**
-       * @TODO remove DevDotContent here. It's used for scroll-margin-top
-       * on headings only. We should instead use g-offset-scroll-margin-top.
-       * Asana:
-       * https://app.asana.com/0/1202097197789424/1202370169937866/f
-       */}
-      <DevDotContent>
-        <PageHeader />
-        <DownloadsSection
-          packageManagers={packageManagers}
-          selectedRelease={releases.versions[currentVersion]}
-          versionSwitcherOptions={versionSwitcherOptions}
-        />
-        <OfficialReleasesSection />
-      </DevDotContent>
-      {featuredLearnCards ? (
-        <FeaturedTutorialsSection featuredLearnCards={featuredLearnCards} />
-      ) : null}
-    </SidebarSidecarLayout>
-  )
+	if (currentProduct.slug === 'vagrant') {
+		downloadsByOS = {
+			...downloadsByOS,
+			...(downloadsByOS.linux?.amd64
+				? { linux: { amd64: downloadsByOS.linux.amd64 } }
+				: {}),
+		}
+	}
+
+	// Build download sidebar menu items, which vary with the selected release.
+	const downloadMenuItems = Object.keys(downloadsByOS).map(
+		(osKey: string): MenuItem => ({
+			title: prettyOs(osKey),
+			fullPath: `#${osKey}`,
+		})
+	)
+	/**
+	 * If we have featured content, we'll conditionally render that content,
+	 * and add a heading to our sidebar as well.
+	 */
+	const hasCollectionCards = featuredCollectionCards?.length > 0
+	const hasTutorialCards = featuredTutorialCards?.length > 0
+	const hasFeaturedContent = hasCollectionCards || hasTutorialCards
+	const featuredItems = hasFeaturedContent
+		? [
+				{
+					title: SHARED_HEADINGS.featured.text,
+					fullPath: `#${SHARED_HEADINGS.featured.id}`,
+				},
+		  ]
+		: []
+
+	const sidebarNavDataLevels = [
+		generateTopLevelSidebarNavData(currentProduct.name),
+		generateProductLandingSidebarNavData(currentProduct),
+		generateInstallViewNavItems(
+			currentProduct,
+			[
+				{ divider: true },
+				{ heading: 'Operating Systems' },
+				...downloadMenuItems,
+				...additionalDownloadItems,
+				{ divider: true },
+				{
+					title: SHARED_HEADINGS.releaseInfo.text,
+					fullPath: `#${SHARED_HEADINGS.releaseInfo.id}`,
+				},
+				...featuredItems,
+				...sidebarMenuItems,
+			],
+			isEnterpriseMode
+		),
+	]
+
+	return (
+		<SidebarSidecarLayout
+			sidebarNavDataLevels={sidebarNavDataLevels as SidebarProps[]}
+			breadcrumbLinks={breadcrumbLinks}
+			sidecarSlot={
+				<>
+					<SidecarMarketingCard {...sidecarMarketingCard} />
+					{sidecarHcpCallout ? (
+						<div className={s.sidecarTryHcpCallout}>
+							<TryHcpCalloutCompact
+								productSlug={sidecarHcpCallout.productSlug}
+								heading={sidecarHcpCallout.heading}
+								description={sidecarHcpCallout.description}
+								ctaText={sidecarHcpCallout.ctaText}
+								ctaUrl={sidecarHcpCallout.ctaUrl}
+							/>
+						</div>
+					) : null}
+				</>
+			}
+		>
+			{/**
+			 * Legal has requested that we make the enterprise downloads page public
+			 * but not search engine indexable
+			 */}
+			{isEnterpriseMode ? (
+				<Head>
+					<meta name="robots" content="noindex, nofollow" key="robots" />
+				</Head>
+			) : null}
+			<PageHeader
+				isEnterpriseMode={isEnterpriseMode}
+				product={{
+					name: installName || currentProduct.name,
+					slug: currentProduct.slug,
+				}}
+				versionSwitcherOptions={versionSwitcherOptions}
+			/>
+			{merchandisingSlot?.position === 'above' ? merchandisingSlot.slot : null}
+			<DownloadsSection
+				packageManagers={packageManagers}
+				selectedRelease={selectedRelease}
+				downloadsByOS={downloadsByOS}
+			/>
+			{merchandisingSlot?.position === 'middle' ? merchandisingSlot.slot : null}
+			<ReleaseInformationSection
+				releaseHeading={SHARED_HEADINGS.releaseInfo}
+				selectedRelease={selectedRelease}
+				isEnterpriseMode={isEnterpriseMode}
+			/>
+			{merchandisingSlot?.position === 'below' ? merchandisingSlot.slot : null}
+			{hasFeaturedContent ? (
+				<ContentWithPermalink
+					className={s.nextStepsHeading}
+					id={SHARED_HEADINGS.featured.id}
+					ariaLabel={SHARED_HEADINGS.featured.text}
+				>
+					<Heading
+						className={viewStyles.scrollHeading}
+						level={2}
+						id={SHARED_HEADINGS.featured.id}
+						size={500}
+						weight="bold"
+					>
+						{SHARED_HEADINGS.featured.text}
+					</Heading>
+				</ContentWithPermalink>
+			) : null}
+			<FeaturedLearnCardsSection
+				cards={featuredCollectionCards}
+				cardType="collection"
+			/>
+			<FeaturedLearnCardsSection
+				cards={featuredTutorialCards}
+				cardType="tutorial"
+			/>
+		</SidebarSidecarLayout>
+	)
 }
 
 /**
  * Handles rendering and initializing `CurrentVersionProvider`.
  */
 const ProductDownloadsView = ({
-  latestVersion,
-  pageContent,
-  releases,
+	isEnterpriseMode = false,
+	latestVersion,
+	merchandisingSlot,
+	pageContent,
+	releases,
+	sortedAndFilteredVersions,
+	packageManagers,
 }: ProductDownloadsViewProps): ReactElement => {
-  const versionSwitcherOptions = useMemo(
-    () => initializeVersionSwitcherOptions({ latestVersion, releases }),
-    [latestVersion, releases]
-  )
+	const versionSwitcherOptions = useMemo(
+		() =>
+			initializeVersionSwitcherOptions({
+				latestVersion,
+				releaseVersions: sortedAndFilteredVersions,
+			}),
+		[latestVersion, sortedAndFilteredVersions]
+	)
 
-  return (
-    <CurrentVersionProvider
-      initialValue={versionSwitcherOptions[0].value}
-      latestVersion={latestVersion}
-    >
-      <ProductDownloadsViewContent
-        pageContent={pageContent}
-        releases={releases}
-        versionSwitcherOptions={versionSwitcherOptions}
-      />
-    </CurrentVersionProvider>
-  )
+	return (
+		<CurrentVersionProvider
+			initialValue={latestVersion}
+			latestVersion={latestVersion}
+		>
+			<ProductDownloadsViewContent
+				isEnterpriseMode={isEnterpriseMode}
+				merchandisingSlot={merchandisingSlot}
+				pageContent={pageContent}
+				releases={releases}
+				versionSwitcherOptions={versionSwitcherOptions}
+				packageManagers={packageManagers}
+			/>
+		</CurrentVersionProvider>
+	)
 }
 
 export default ProductDownloadsView
