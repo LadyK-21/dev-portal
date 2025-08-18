@@ -150,7 +150,7 @@
 		"@shikijs/rehype": "^1.3.0",
 		"@swc/core": "^1.4.8",
 		"@tanstack/react-query": "^4.1.3",
-		"@tanstack/react-query-devtools": "^4.0.10",
+		"@tanstack/react-query-devtools": "^4.40.1",
 		"@types/adm-zip": "^0.5.4",
 		"@types/cors": "^2.8.12",
 		"@types/google-spreadsheet": "^3.2.2",
