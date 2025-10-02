@@ -167,7 +167,7 @@
 		"deepmerge-ts": "^4.2.2",
 		"eslint-plugin-react-hooks": "^5.2.0",
 		"framer-motion": "^7.5.1",
-		"google-spreadsheet": "^3.3.0",
+		"google-spreadsheet": "^4.0.0",
 		"gray-matter": "^4.0.3",
 		"hast-util-sanitize": "^4.1.0",
 		"hast-util-to-html": "^7.1.3",
