@@ -96,7 +96,7 @@
 		"yargs": "^17.6.2"
 	},
 	"dependencies": {
-		"@actions/core": "^1.9.1",
+		"@actions/core": "^1.11.0",
 		"@apidevtools/json-schema-ref-parser": "^9.0.9",
 		"@hashicorp/design-system-tokens": "^2.3.0",
 		"@hashicorp/flight-icons": "^3.7.0",
